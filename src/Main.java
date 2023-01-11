@@ -1,4 +1,5 @@
-import kanban.*;
+import ru.smg.kanban.Task;
+import ru.smg.kanban.TaskManager;
 
 public class Main {
 
@@ -57,15 +58,8 @@ public class Main {
 
     private static void printTaskManagerContents(TaskManager manager) {
         System.out.println("Задачи:");
-        manager.getAllTasks().forEach(t -> System.out.println(t.getName() + "(" + t.getDescription() + ") ["
-                + t.getStatus() + "]"));
-
+        manager.getAllTasks().forEach(t -> System.out.println(t.toString()));
         System.out.println("\nЭпики:");
-        manager.getAllEpics().forEach(t ->{
-            System.out.println(t.getName() + "(" + t.getDescription() + ") [" + t.getStatus() + "]" );
-            var e = (Epic)t;
-            e.getSubtasks().forEach(st -> System.out.println("   -" + st.getName() + "(" + st.getDescription() + ") ["
-                    + st.getStatus() + "]"));
-        });
+        manager.getAllEpics().forEach(t -> System.out.println(t.toString()));
     }
 }

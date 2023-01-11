@@ -1,4 +1,4 @@
-package kanban;
+package ru.smg.kanban;
 
 import java.util.ArrayList;
 
@@ -37,4 +37,12 @@ public class Epic extends Task {
         return Status.IN_PROGRESS;
     }
 
+    @Override
+    public String toString() {
+        StringBuilder str = new StringBuilder(super.toString() + "\n");
+        for (var s : subtasks) {
+            str.append("    ").append(s.toString()).append("\n");
+        }
+        return str.toString();
+    }
 }

@@ -1,6 +1,7 @@
-package kanban;
+package ru.smg.kanban;
 
 public class Task {
+
     public enum Status {
         NEW,
         IN_PROGRESS,
@@ -32,5 +33,10 @@ public class Task {
         this.name = name;
         this.description = description;
         this.status = status;
+    }
+
+    @Override
+    public String toString() {
+        return getName() + "(" + getDescription() + ") [" + getStatus() + "]";
     }
 }

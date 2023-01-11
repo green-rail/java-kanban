@@ -1,4 +1,4 @@
-package kanban;
+package ru.smg.kanban;
 
 import java.util.ArrayList;
 import java.util.HashMap;

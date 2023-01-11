@@ -1,4 +1,4 @@
-package kanban;
+package ru.smg.kanban;
 
 public class Subtask extends Task {
 
