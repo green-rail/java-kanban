@@ -1,11 +1,10 @@
-import ru.smg.kanban.Task;
+import ru.smg.kanban.Managers;
 import ru.smg.kanban.TaskManager;
 
 public class Main {
 
     public static void main(String[] args) {
-
-        TaskManager taskManager = new TaskManager();
+        TaskManager taskManager = Managers.getDefault();
         var taskSound = taskManager.makeTask("Добавить звук",
                 "Звуки ui, выигрыша, проигрыша, фоновая музыка");
         taskManager.addTask(taskSound);
@@ -31,35 +30,19 @@ public class Main {
                 "Изучить этот вопрос, есть подозрение что придется всё переписать на корутинах", epicAsync);
         taskManager.addTask(subAsync1);
 
-        printTaskManagerContents(taskManager);
+        taskManager.getTaskById(taskSound.getId());
+        taskManager.getTaskById(taskSound.getId());
+        taskManager.getEpicById(epicSDK.getId());
+        taskManager.getSubtaskById(subSDK1.getId());
+        taskManager.getSubtaskById(subSDK2.getId());
+        taskManager.getSubtaskById(subAsync1.getId());
+        taskManager.getTaskById(taskUI.getId());
+        taskManager.getTaskById(taskUI.getId());
+        taskManager.getTaskById(taskUI.getId());
+        taskManager.getTaskById(taskUI.getId());
+        taskManager.getEpicById(epicAsync.getId());
 
-        taskManager.updateTask(taskManager.makeTask(taskSound, taskSound.getName(), taskSound.getDescription(),
-                Task.Status.DONE));
-        taskManager.updateTask(taskManager.makeTask(taskUI, taskUI.getName(), taskUI.getDescription(),
-                Task.Status.IN_PROGRESS));
-
-        taskManager.updateTask(taskManager.makeSubtask(subSDK1, subSDK1.getName(), subSDK1.getDescription(),
-                subSDK1.getHolder(), Task.Status.IN_PROGRESS));
-
-        taskManager.updateTask(taskManager.makeSubtask(subAsync1, subAsync1.getName(), subAsync1.getDescription(),
-                subAsync1.getHolder(), Task.Status.DONE));
-
-        System.out.println("\nСостояние после обновления:");
-
-        printTaskManagerContents(taskManager);
-
-        taskManager.deleteTask(taskSound);
-        taskManager.deleteTask(epicAsync);
-        taskManager.deleteTask(subSDK2);
-
-        System.out.println("\nСостояние после удаления:");
-        printTaskManagerContents(taskManager);
-    }
-
-    private static void printTaskManagerContents(TaskManager manager) {
-        System.out.println("Задачи:");
-        manager.getAllTasks().forEach(t -> System.out.println(t.toString()));
-        System.out.println("\nЭпики:");
-        manager.getAllEpics().forEach(t -> System.out.println(t.toString()));
+        System.out.println("\nИстория:");
+        taskManager.getHistory().forEach(System.out::println);
     }
 }

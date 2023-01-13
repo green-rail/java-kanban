@@ -2,12 +2,6 @@ package ru.smg.kanban;
 
 public class Task {
 
-    public enum Status {
-        NEW,
-        IN_PROGRESS,
-        DONE
-    }
-
     public long getId() {
         return id;
     }
