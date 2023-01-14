@@ -1,4 +1,4 @@
-package ru.smg.kanban;
+package ru.smg.kanban.tasks;
 
 public class Subtask extends Task {
 
@@ -7,7 +7,7 @@ public class Subtask extends Task {
     }
     private final Epic holder;
 
-    Subtask(long id, String name, String description, Status status, Epic holder) {
+    public Subtask(long id, String name, String description, Status status, Epic holder) {
         super(id, name, description, status);
         this.holder = holder;
     }

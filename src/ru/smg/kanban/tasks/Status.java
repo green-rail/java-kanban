@@ -1,4 +1,4 @@
-package ru.smg.kanban;
+package ru.smg.kanban.tasks;
 
 public enum Status {
     NEW,

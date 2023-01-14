@@ -1,4 +1,4 @@
-package ru.smg.kanban;
+package ru.smg.kanban.managers;
 
 public class Managers {
     public static TaskManager getDefault(){

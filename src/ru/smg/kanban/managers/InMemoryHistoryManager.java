@@ -1,4 +1,6 @@
-package ru.smg.kanban;
+package ru.smg.kanban.managers;
+
+import ru.smg.kanban.tasks.Task;
 
 import java.util.LinkedList;
 import java.util.List;

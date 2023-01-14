@@ -1,4 +1,4 @@
-package ru.smg.kanban;
+package ru.smg.kanban.tasks;
 
 import java.util.ArrayList;
 
@@ -9,7 +9,7 @@ public class Epic extends Task {
     }
     private final ArrayList<Subtask> subtasks;
 
-    Epic(long id, String name, String description, ArrayList<Subtask> subtasks) {
+    public Epic(long id, String name, String description, ArrayList<Subtask> subtasks) {
         super(id, name, description, Status.NEW);
         this.subtasks = subtasks;
     }

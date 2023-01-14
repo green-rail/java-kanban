@@ -1,4 +1,4 @@
-package ru.smg.kanban;
+package ru.smg.kanban.tasks;
 
 public class Task {
 
@@ -22,7 +22,7 @@ public class Task {
     private final String description;
     private final Status status;
 
-    Task(long id, String name, String description, Status status ) {
+    public Task(long id, String name, String description, Status status ) {
         this.id = id;
         this.name = name;
         this.description = description;

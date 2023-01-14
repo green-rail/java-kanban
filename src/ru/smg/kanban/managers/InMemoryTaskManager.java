@@ -1,8 +1,12 @@
-package ru.smg.kanban;
+package ru.smg.kanban.managers;
+
+import ru.smg.kanban.tasks.Epic;
+import ru.smg.kanban.tasks.Status;
+import ru.smg.kanban.tasks.Subtask;
+import ru.smg.kanban.tasks.Task;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 
 public class InMemoryTaskManager implements TaskManager {
@@ -46,6 +50,7 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public void clearAllSubtasks() {
+        epics.values().forEach(e -> ((Epic)e).getSubtasks().clear());
         subTasks.clear();
     }
 

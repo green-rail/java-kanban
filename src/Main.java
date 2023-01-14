@@ -1,5 +1,5 @@
-import ru.smg.kanban.Managers;
-import ru.smg.kanban.TaskManager;
+import ru.smg.kanban.managers.Managers;
+import ru.smg.kanban.managers.TaskManager;
 
 public class Main {
 
@@ -44,5 +44,9 @@ public class Main {
 
         System.out.println("\nИстория:");
         taskManager.getHistory().forEach(System.out::println);
+
+        taskManager.clearAllSubtasks();
+        System.out.println("\nПроверяем очистку подзадач:");
+        taskManager.getAllEpics().forEach(System.out::println);
     }
 }

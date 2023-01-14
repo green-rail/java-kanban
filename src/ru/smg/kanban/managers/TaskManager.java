@@ -1,7 +1,11 @@
-package ru.smg.kanban;
+package ru.smg.kanban.managers;
+
+import ru.smg.kanban.tasks.Epic;
+import ru.smg.kanban.tasks.Status;
+import ru.smg.kanban.tasks.Subtask;
+import ru.smg.kanban.tasks.Task;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
 public interface TaskManager {
