@@ -13,40 +13,46 @@ public class Main {
         taskManager.addTask(taskUI);
 
         var epicSDK = taskManager.makeEpic("SDK Яндекс игр", "Интегрировать SDK Яндекс игр");
-
         taskManager.addTask(epicSDK);
         var subSDK1 = taskManager.makeSubtask("Изучить документацию",
                 "За последнее время SDK обновился, нужно быть в курсе изменений", epicSDK);
         taskManager.addTask(subSDK1);
-
         var subSDK2 = taskManager.makeSubtask("Лидерборд",
                 "Оценить сложность реализации. Если сложно то целесообразность фичи под вопросом", epicSDK);
         taskManager.addTask(subSDK2);
+        var subSDK3 = taskManager.makeSubtask("Облачные сейвы",
+                "Добавить сохранение прогресса", epicSDK);
+        taskManager.addTask(subSDK3);
 
         var epicAsync = taskManager.makeEpic("Асинхронный код",
                 "Всё что касается асинхронного кода");
         taskManager.addTask(epicAsync);
-        var subAsync1 = taskManager.makeSubtask("Async/await в WebGL",
-                "Изучить этот вопрос, есть подозрение что придется всё переписать на корутинах", epicAsync);
-        taskManager.addTask(subAsync1);
 
         taskManager.getTaskById(taskSound.getId());
         taskManager.getTaskById(taskSound.getId());
-        taskManager.getEpicById(epicSDK.getId());
+        printHistory(taskManager);
+
         taskManager.getSubtaskById(subSDK1.getId());
         taskManager.getSubtaskById(subSDK2.getId());
-        taskManager.getSubtaskById(subAsync1.getId());
-        taskManager.getTaskById(taskUI.getId());
-        taskManager.getTaskById(taskUI.getId());
-        taskManager.getTaskById(taskUI.getId());
-        taskManager.getTaskById(taskUI.getId());
-        taskManager.getEpicById(epicAsync.getId());
+        printHistory(taskManager);
 
+        taskManager.getTaskById(taskUI.getId());
+        taskManager.getEpicById(epicSDK.getId());
+        taskManager.getTaskById(taskUI.getId());
+        taskManager.getEpicById(epicSDK.getId());
+        printHistory(taskManager);
+
+        taskManager.deleteTask(taskSound);
+        System.out.println("Удаляем задачу");
+        printHistory(taskManager);
+
+        taskManager.deleteTask(epicSDK);
+        System.out.println("Удаляем эпик");
+        printHistory(taskManager);
+    }
+
+    private static void printHistory(TaskManager manager) {
         System.out.println("\nИстория:");
-        taskManager.getHistory().forEach(System.out::println);
-
-        taskManager.clearAllSubtasks();
-        System.out.println("\nПроверяем очистку подзадач:");
-        taskManager.getAllEpics().forEach(System.out::println);
+        manager.getHistory().forEach(System.out::println);
     }
 }

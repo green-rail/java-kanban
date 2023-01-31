@@ -10,10 +10,10 @@ import java.util.HashMap;
 import java.util.List;
 
 public class InMemoryTaskManager implements TaskManager {
-    private final HashMap<Long, Task> tasks;
-    private final HashMap<Long, Task> epics;
-    private final HashMap<Long, Task> subTasks;
-    private long nextTaskId = 0;
+    private final HashMap<Integer, Task> tasks;
+    private final HashMap<Integer, Task> epics;
+    private final HashMap<Integer, Task> subTasks;
+    private int nextTaskId = 0;
     private final HistoryManager historyManager;
 
     public InMemoryTaskManager(HistoryManager manager) {
@@ -35,7 +35,7 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public ArrayList<Task> getAllSubtasks() {
-        return (ArrayList<Task>)subTasks.values();
+        return (ArrayList<Task>) subTasks.values();
     }
 
     @Override
@@ -50,42 +50,42 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public void clearAllSubtasks() {
-        epics.values().forEach(e -> ((Epic)e).getSubtasks().clear());
+        epics.values().forEach(e -> ((Epic) e).getSubtasks().clear());
         subTasks.clear();
     }
 
-    private void logHistory(Task task){
+    private void logHistory(Task task) {
         historyManager.add(task);
     }
 
     @Override
-    public Task getTaskById(long id) {
+    public Task getTaskById(int id) {
         var task = tasks.get(id);
         logHistory(task);
         return task;
     }
 
     @Override
-    public Epic getEpicById(long id) {
+    public Epic getEpicById(int id) {
         var task = epics.get(id);
         logHistory(task);
-        return (Epic)task;
+        return (Epic) task;
     }
 
     @Override
-    public Subtask getSubtaskById(long id) {
+    public Subtask getSubtaskById(int id) {
         var task = subTasks.get(id);
         logHistory(task);
-        return (Subtask)task;
+        return (Subtask) task;
     }
 
     @Override
     public void addTask(Task task) {
-        if (task == null){
+        if (task == null) {
             return;
         }
-        if (task instanceof Subtask){
-            var subtask = (Subtask)task;
+        if (task instanceof Subtask) {
+            var subtask = (Subtask) task;
             subtask.getHolder().getSubtasks().add(subtask);
         }
         getHashMap(task).put(task.getId(), task);
@@ -124,11 +124,11 @@ public class InMemoryTaskManager implements TaskManager {
     @Override
     public void updateTask(Task task) {
         var map = getHashMap(task);
-        if (task instanceof Subtask){
-            var subtask = (Subtask)task;
+        if (task instanceof Subtask) {
+            var subtask = (Subtask) task;
             var subtasks = subtask.getHolder().getSubtasks();
             for (int i = 0; i < subtasks.size(); i++) {
-                if (subtask.getId() == subtasks.get(i).getId()){
+                if (subtask.getId() == subtasks.get(i).getId()) {
                     subtasks.set(i, subtask);
                     break;
                 }
@@ -140,15 +140,17 @@ public class InMemoryTaskManager implements TaskManager {
     @Override
     public void deleteTask(Task task) {
         var map = getHashMap(task);
-        if (task instanceof Epic){
-            for (Subtask subtask: ((Epic)task).getSubtasks()) {
+        if (task instanceof Epic) {
+            for (Subtask subtask : ((Epic) task).getSubtasks()) {
                 map.remove(subtask.getId());
+                historyManager.remove(subtask.getId());
             }
         }
-        if (task instanceof Subtask){
-            ((Subtask)task).getHolder().getSubtasks().remove(task);
+        if (task instanceof Subtask) {
+            ((Subtask) task).getHolder().getSubtasks().remove(task);
         }
         map.remove(task.getId());
+        historyManager.remove(task.getId());
     }
 
     @Override
@@ -161,8 +163,8 @@ public class InMemoryTaskManager implements TaskManager {
         return historyManager.getHistory();
     }
 
-    private HashMap<Long, Task> getHashMap(Task task) {
-        if (task instanceof Epic){
+    private HashMap<Integer, Task> getHashMap(Task task) {
+        if (task instanceof Epic) {
             return epics;
         } else if (task instanceof Subtask) {
             return subTasks;
