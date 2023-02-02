@@ -19,9 +19,22 @@ public class Task {
     }
 
     private final int id;
-    private final String name;
-    private final String description;
-    private final Status status;
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public void setStatus(Status status) {
+        this.status = status;
+    }
+
+    private String name;
+    private String description;
+    private Status status;
 
     public Task(int id, String name, String description, Status status) {
         this.id = id;
@@ -30,8 +43,12 @@ public class Task {
         this.status = status;
     }
 
+    protected String getToStringPrefix(){
+        return "[" + getId() + " task] ";
+    }
+
     @Override
     public String toString() {
-        return getName() + "(" + getDescription() + ") [" + getStatus() + "]";
+        return getToStringPrefix() + getName() + "(" + getDescription() + ") [" + getStatus() + "]";
     }
 }

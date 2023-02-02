@@ -3,7 +3,6 @@ package ru.smg.kanban.tasks;
 import java.util.ArrayList;
 
 public class Epic extends Task {
-
     public ArrayList<Subtask> getSubtasks() {
         return subtasks;
     }
@@ -36,6 +35,11 @@ public class Epic extends Task {
             return Status.DONE;
         }
         return Status.IN_PROGRESS;
+    }
+
+    @Override
+    protected String getToStringPrefix() {
+        return "[" + getId() + " epic] ";
     }
 
     @Override

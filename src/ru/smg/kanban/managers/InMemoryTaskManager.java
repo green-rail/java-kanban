@@ -55,7 +55,9 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     private void logHistory(Task task) {
-        historyManager.add(task);
+        if (task != null){
+            historyManager.add(task);
+        }
     }
 
     @Override

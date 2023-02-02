@@ -28,7 +28,8 @@ public class Main {
                 "Всё что касается асинхронного кода");
         taskManager.addTask(epicAsync);
 
-        taskManager.getTaskById(taskSound.getId());
+        //taskManager.getTaskById(taskSound.getId());
+        taskManager.getTaskById(500);
         taskManager.getTaskById(taskSound.getId());
         printHistory(taskManager);
 
@@ -42,17 +43,18 @@ public class Main {
         taskManager.getEpicById(epicSDK.getId());
         printHistory(taskManager);
 
+        System.out.println("Удаляем задачу " + taskSound.getId());
         taskManager.deleteTask(taskSound);
-        System.out.println("Удаляем задачу");
         printHistory(taskManager);
 
+        System.out.println("Удаляем эпик " + epicSDK.getId());
         taskManager.deleteTask(epicSDK);
-        System.out.println("Удаляем эпик");
         printHistory(taskManager);
     }
 
     private static void printHistory(TaskManager manager) {
         System.out.println("\nИстория:");
-        manager.getHistory().forEach(System.out::println);
+        //manager.getHistory().forEach(System.out::println);
+        System.out.println(manager.getHistory());
     }
 }
