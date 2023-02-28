@@ -6,6 +6,8 @@ public class Task {
         return id;
     }
 
+    protected TaskType taskType;
+
     public String getName() {
         return name;
     }
@@ -41,6 +43,7 @@ public class Task {
         this.name = name;
         this.description = description;
         this.status = status;
+        this.taskType = TaskType.TASK;
     }
 
     protected String getToStringPrefix(){
@@ -50,5 +53,9 @@ public class Task {
     @Override
     public String toString() {
         return getToStringPrefix() + getName() + "(" + getDescription() + ") [" + getStatus() + "]";
+    }
+
+    public String serialize() {
+        return String.format("%s,%s,%s,%s,%s", id, taskType, name, status, description);
     }
 }

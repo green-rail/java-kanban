@@ -10,11 +10,11 @@ import java.util.HashMap;
 import java.util.List;
 
 public class InMemoryTaskManager implements TaskManager {
+    protected final HistoryManager historyManager;
     private final HashMap<Integer, Task> tasks;
     private final HashMap<Integer, Task> epics;
     private final HashMap<Integer, Task> subTasks;
     private int nextTaskId = 0;
-    private final HistoryManager historyManager;
 
     public InMemoryTaskManager(HistoryManager manager) {
         tasks = new HashMap<>();
@@ -35,7 +35,7 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public ArrayList<Task> getAllSubtasks() {
-        return (ArrayList<Task>) subTasks.values();
+        return new ArrayList<>(subTasks.values());
     }
 
     @Override
@@ -54,10 +54,19 @@ public class InMemoryTaskManager implements TaskManager {
         subTasks.clear();
     }
 
-    private void logHistory(Task task) {
-        if (task != null){
+    protected void logHistory(Task task) {
+        if (task != null) {
             historyManager.add(task);
         }
+    }
+
+    protected Task getTask(int id) {
+        if (tasks.containsKey(id)) {
+            return tasks.get(id);
+        } else if (epics.containsKey(id)) {
+            return epics.get(id);
+        }
+        return subTasks.getOrDefault(id, null);
     }
 
     @Override
