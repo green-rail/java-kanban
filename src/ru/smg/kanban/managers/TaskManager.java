@@ -24,20 +24,12 @@ public interface TaskManager {
     Epic getEpicById(int id);
     Subtask getSubtaskById(int id);
 
+    int getNextId();
+
     void addTask(Task task);
 
-    Task makeTask(String name, String description);
-
-    Task makeTask(Task task, String name, String description, Status status);
-    Epic makeEpic(String name, String description);
-    Epic makeEpic(Epic epic, String name, String description);
-    Subtask makeSubtask(String name, String description, Epic epic);
-    Subtask makeSubtask(Subtask subtask, String name, String description, Epic epic, Status status);
-
     void updateTask(Task task);
-
     void deleteTask(Task task);
     ArrayList<Subtask> getSubtasks(Epic epic);
-
     List<Task> getHistory();
 }

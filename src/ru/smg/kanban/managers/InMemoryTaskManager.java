@@ -14,7 +14,12 @@ public class InMemoryTaskManager implements TaskManager {
     private final HashMap<Integer, Task> tasks;
     private final HashMap<Integer, Task> epics;
     private final HashMap<Integer, Task> subTasks;
-    private int nextTaskId = 0;
+    protected int nextId = 0;
+    public int getNextId() {
+        int id = nextId;
+        nextId++;
+        return id;
+    }
 
     public InMemoryTaskManager(HistoryManager manager) {
         tasks = new HashMap<>();
@@ -40,17 +45,26 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public void clearAllTasks() {
+        tasks.values().forEach(t -> historyManager.remove(t.getId()));
         tasks.clear();
     }
 
     @Override
     public void clearAllEpics() {
+        for (Task epic : epics.values()) {
+            ((Epic)epic).getSubtasks().forEach(st -> historyManager.remove(st.getId()));
+            historyManager.remove(epic.getId());
+        }
         epics.clear();
     }
 
     @Override
     public void clearAllSubtasks() {
-        epics.values().forEach(e -> ((Epic) e).getSubtasks().clear());
+        for (Task epic : epics.values()) {
+            var subtasks = ((Epic) epic).getSubtasks();
+            subtasks.forEach(st -> historyManager.remove(st.getId()));
+            subtasks.clear();
+        }
         subTasks.clear();
     }
 
@@ -100,36 +114,6 @@ public class InMemoryTaskManager implements TaskManager {
             subtask.getHolder().getSubtasks().add(subtask);
         }
         getHashMap(task).put(task.getId(), task);
-    }
-
-    @Override
-    public Task makeTask(String name, String description) {
-        return new Task(nextTaskId++, name, description, Status.NEW);
-    }
-
-    @Override
-    public Task makeTask(Task task, String name, String description, Status status) {
-        return new Task(task.getId(), name, description, status);
-    }
-
-    @Override
-    public Epic makeEpic(String name, String description) {
-        return new Epic(nextTaskId++, name, description, new ArrayList<>());
-    }
-
-    @Override
-    public Epic makeEpic(Epic epic, String name, String description) {
-        return new Epic(epic.getId(), name, description, epic.getSubtasks());
-    }
-
-    @Override
-    public Subtask makeSubtask(String name, String description, Epic epic) {
-        return new Subtask(nextTaskId++, name, description, Status.NEW, epic);
-    }
-
-    @Override
-    public Subtask makeSubtask(Subtask subtask, String name, String description, Epic epic, Status status) {
-        return new Subtask(subtask.getId(), name, description, status, epic);
     }
 
     @Override
