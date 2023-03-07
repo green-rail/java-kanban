@@ -16,6 +16,12 @@ public class Epic extends Task {
         taskType = TaskType.EPIC;
     }
 
+    public Epic(String name, String description, ArrayList<Subtask> subtasks) {
+        super(name, description, Status.NEW);
+        this.subtasks = subtasks;
+        taskType = TaskType.EPIC;
+    }
+
     @Override
     public Status getStatus() {
         if (subtasks.size() == 0) {

@@ -15,11 +15,6 @@ public class InMemoryTaskManager implements TaskManager {
     private final HashMap<Integer, Task> epics;
     private final HashMap<Integer, Task> subTasks;
     protected int nextId = 0;
-    public int getNextId() {
-        int id = nextId;
-        nextId++;
-        return id;
-    }
 
     public InMemoryTaskManager(HistoryManager manager) {
         tasks = new HashMap<>();
@@ -105,15 +100,17 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     @Override
-    public void addTask(Task task) {
+    public int addTask(Task task) {
         if (task == null) {
-            return;
+            return -1;
         }
+        task.setId(nextId++);
         if (task instanceof Subtask) {
             var subtask = (Subtask) task;
             subtask.getHolder().getSubtasks().add(subtask);
         }
         getHashMap(task).put(task.getId(), task);
+        return task.getId();
     }
 
     @Override

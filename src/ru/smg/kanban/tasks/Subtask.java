@@ -18,6 +18,11 @@ public class Subtask extends Task {
         this.holder = holder;
         taskType = TaskType.SUBTASK;
     }
+    public Subtask(String name, String description, Status status, Epic holder) {
+        super(name, description, status);
+        this.holder = holder;
+        taskType = TaskType.SUBTASK;
+    }
 
     @Override
     public String serialize() {

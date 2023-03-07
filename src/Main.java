@@ -9,32 +9,31 @@ public class Main {
     public static void main(String[] args) {
         TaskManager taskManager = Managers.getDefault();
 
-        var taskSound = new Task(taskManager.getNextId(), "Добавить звук",
+        var taskSound = new Task( "Добавить звук",
                 "Звуки ui; выигрыша; проигрыша; фоновая музыка", Status.NEW);
         taskManager.addTask(taskSound);
 
-        var taskUI = new Task(taskManager.getNextId(), "Адаптивный ui",
+        var taskUI = new Task("Адаптивный ui",
                 "Добавить поддержку портретного и горизонтального режимов экрана", Status.NEW);
         taskManager.addTask(taskUI);
 
-        var epicSDK = new Epic(taskManager.getNextId(),
-                "SDK Яндекс игр", "Интегрировать SDK Яндекс игр", new ArrayList<>());
+        var epicSDK = new Epic("SDK Яндекс игр", "Интегрировать SDK Яндекс игр", new ArrayList<>());
         taskManager.addTask(epicSDK);
 
-        var subSDK1 = new Subtask(taskManager.getNextId(), "Изучить документацию",
+        var subSDK1 = new Subtask("Изучить документацию",
                 "За последнее время SDK обновился нужно быть в курсе изменений", Status.NEW, epicSDK);
         taskManager.addTask(subSDK1);
 
-        var subSDK2 = new Subtask(taskManager.getNextId(), "Лидерборд",
+        var subSDK2 = new Subtask("Лидерборд",
                 "Оценить сложность реализации. Если сложно то целесообразность фичи под вопросом",
                 Status.NEW,  epicSDK);
         taskManager.addTask(subSDK2);
 
-        var subSDK3 = new Subtask(taskManager.getNextId(), "Облачные сейвы",
+        var subSDK3 = new Subtask("Облачные сейвы",
                 "Добавить сохранение прогресса", Status.NEW, epicSDK);
         taskManager.addTask(subSDK3);
 
-        var epicAsync = new Epic( taskManager.getNextId(), "Асинхронный код",
+        var epicAsync = new Epic( "Асинхронный код",
                 "Всё что касается асинхронного кода", new ArrayList<>());
         taskManager.addTask(epicAsync);
 
