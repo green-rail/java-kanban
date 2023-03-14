@@ -19,7 +19,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
         this.saveFile = saveFile;
     }
 
-    private static FileBackedTasksManager loadFromFile(File file) {
+    public static FileBackedTasksManager loadFromFile(File file) {
         var historyManager = new InMemoryHistoryManager();
         var manager = new FileBackedTasksManager(historyManager, file);
         manager.load();
@@ -92,6 +92,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
 
     private static List<Integer> historyFromString(String value) {
         List<Integer> result = new ArrayList<>();
+        if (value == null || value.isBlank()) return result;
         String[] items = value.split(",");
         for (String item : items) {
             result.add(Integer.parseInt(item));
@@ -151,7 +152,11 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
                 }
                 line = lineReader.readLine();
             }
-            var history = historyFromString(lineReader.readLine());
+            String historyLine = lineReader.readLine();
+            if (historyLine == null || historyLine.isBlank()) {
+                return;
+            }
+            var history = historyFromString(historyLine);
             if (history.isEmpty()) {
                 return;
             }
@@ -221,7 +226,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
                 description.append(split[i]);
             }
             return isTask ? new Task(id, name, description.toString(), status) :
-                    new Epic(id, name, description.toString(), new ArrayList<>());
+                            new Epic(id, name, description.toString(), new ArrayList<>());
         }
         for (int i = 4; i < split.length - 1; i++) {
             description.append(split[i]);

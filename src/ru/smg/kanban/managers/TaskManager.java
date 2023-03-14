@@ -10,11 +10,11 @@ import java.util.List;
 
 public interface TaskManager {
 
-    ArrayList<Task> getAllTasks();
+    List<Task> getAllTasks();
 
-    ArrayList<Task> getAllEpics();
+    List<Task> getAllEpics();
 
-    ArrayList<Task> getAllSubtasks();
+    List<Task> getAllSubtasks();
 
     void clearAllTasks();
     void clearAllEpics();
@@ -28,6 +28,6 @@ public interface TaskManager {
 
     void updateTask(Task task);
     void deleteTask(Task task);
-    ArrayList<Subtask> getSubtasks(Epic epic);
+    List<Subtask> getSubtasks(Epic epic);
     List<Task> getHistory();
 }

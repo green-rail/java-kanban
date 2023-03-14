@@ -1,5 +1,6 @@
 package ru.smg.kanban.managers;
 
+import ru.smg.kanban.tasks.Epic;
 import ru.smg.kanban.tasks.Task;
 
 import java.util.ArrayList;
@@ -13,7 +14,13 @@ public class InMemoryHistoryManager implements HistoryManager {
 
     @Override
     public List<Task> getHistory() {
-        return getTasks();
+        var list = new ArrayList<Task>(map.size());
+        var node = head;
+        while (node != null) {
+            list.add(node.getValue());
+            node = node.getNext();
+        }
+        return list;
     }
 
     @Override
@@ -24,7 +31,16 @@ public class InMemoryHistoryManager implements HistoryManager {
 
     @Override
     public void remove(int id) {
-        removeNode(map.remove(id));
+        HistoryNode node = map.remove(id);
+        if (node == null) {
+            return;
+        }
+        if (node.value instanceof Epic) {
+            var epic = (Epic)node.value;
+            epic.getSubtasks().forEach(subtask -> remove(subtask.getId()));
+        }
+        removeNode(node);
+        //removeNode(map.remove(id));
     }
 
     private void removeNode(HistoryNode node) {
@@ -54,16 +70,6 @@ public class InMemoryHistoryManager implements HistoryManager {
         tail.setNext(node);
         tail = node;
         return node;
-    }
-
-    private List<Task> getTasks() {
-        var list = new ArrayList<Task>(map.size());
-        var node = head;
-        while (node != null) {
-            list.add(node.getValue());
-            node = node.getNext();
-        }
-        return list;
     }
 
     private class HistoryNode {

@@ -24,25 +24,11 @@ public class Epic extends Task {
 
     @Override
     public Status getStatus() {
-        if (subtasks.size() == 0) {
-            return Status.NEW;
-        }
-        boolean isDone = true;
-        boolean isNew = true;
-        for (Subtask subtask : subtasks) {
-            if (subtask.getStatus() != Status.NEW) {
-                isNew = false;
-            }
-            if (subtask.getStatus() != Status.DONE) {
-                isDone = false;
-            }
-        }
-        if (isNew) {
-            return Status.NEW;
-        } else if (isDone) {
-            return Status.DONE;
-        }
-        return Status.IN_PROGRESS;
+        if (subtasks.isEmpty()) return Status.NEW;
+
+        boolean allDone = subtasks.stream().allMatch(s -> s.getStatus() == Status.DONE);
+        boolean allNew =  subtasks.stream().allMatch(s -> s.getStatus() == Status.NEW);
+        return allDone ? Status.DONE : allNew ? Status.NEW : Status.IN_PROGRESS;
     }
 
     @Override

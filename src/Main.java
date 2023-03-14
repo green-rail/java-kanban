@@ -52,12 +52,13 @@ public class Main {
         taskManager.getEpicById(epicSDK.getId());
         printHistory(taskManager);
 
-        System.out.println("Удаляем задачу " + taskSound.getId());
-        taskManager.deleteTask(taskSound);
-        printHistory(taskManager);
+        //System.out.println("Удаляем задачу " + taskSound.getId());
+        //taskManager.deleteTask(taskSound);
+        //printHistory(taskManager);
 
         System.out.println("Удаляем эпик " + epicSDK.getId());
         taskManager.deleteTask(epicSDK);
+        printHistory(taskManager);
 
         taskManager.clearAllTasks();
         taskManager.clearAllSubtasks();
@@ -67,7 +68,7 @@ public class Main {
 
     private static void printHistory(TaskManager manager) {
         System.out.println("\nИстория:");
-        //manager.getHistory().forEach(System.out::println);
-        System.out.println(manager.getHistory());
+        manager.getHistory().forEach(System.out::println);
+        //System.out.println(manager.getHistory());
     }
 }

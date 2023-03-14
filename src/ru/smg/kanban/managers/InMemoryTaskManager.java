@@ -50,6 +50,7 @@ public class InMemoryTaskManager implements TaskManager {
             ((Epic)epic).getSubtasks().forEach(st -> historyManager.remove(st.getId()));
             historyManager.remove(epic.getId());
         }
+        subTasks.clear();
         epics.clear();
     }
 
@@ -116,9 +117,13 @@ public class InMemoryTaskManager implements TaskManager {
     @Override
     public void updateTask(Task task) {
         var map = getHashMap(task);
+        if (!map.containsKey(task.getId())) {
+            addTask(task);
+            return;
+        }
         if (task instanceof Subtask) {
             var subtask = (Subtask) task;
-            var subtasks = subtask.getHolder().getSubtasks();
+            ArrayList<Subtask> subtasks = subtask.getHolder().getSubtasks();
             for (int i = 0; i < subtasks.size(); i++) {
                 if (subtask.getId() == subtasks.get(i).getId()) {
                     subtasks.set(i, subtask);
@@ -133,8 +138,10 @@ public class InMemoryTaskManager implements TaskManager {
     public void deleteTask(Task task) {
         var map = getHashMap(task);
         if (task instanceof Epic) {
+
             for (Subtask subtask : ((Epic) task).getSubtasks()) {
-                map.remove(subtask.getId());
+                var subtaskMap = getHashMap(subtask);
+                subtaskMap.remove(subtask.getId());
                 historyManager.remove(subtask.getId());
             }
         }
