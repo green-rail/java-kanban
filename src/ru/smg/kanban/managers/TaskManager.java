@@ -6,6 +6,7 @@ import ru.smg.kanban.tasks.Subtask;
 import ru.smg.kanban.tasks.Task;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 public interface TaskManager {
@@ -28,6 +29,6 @@ public interface TaskManager {
 
     void updateTask(Task task);
     void deleteTask(Task task);
-    List<Subtask> getSubtasks(Epic epic);
     List<Task> getHistory();
+    Iterator<Task> getPrioritizedTasks();
 }

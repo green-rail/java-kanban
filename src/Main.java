@@ -17,7 +17,7 @@ public class Main {
                 "Добавить поддержку портретного и горизонтального режимов экрана", Status.NEW);
         taskManager.addTask(taskUI);
 
-        var epicSDK = new Epic("SDK Яндекс игр", "Интегрировать SDK Яндекс игр", new ArrayList<>());
+        var epicSDK = new Epic("SDK Яндекс игр", "Интегрировать SDK Яндекс игр");
         taskManager.addTask(epicSDK);
 
         var subSDK1 = new Subtask("Изучить документацию",
@@ -34,7 +34,7 @@ public class Main {
         taskManager.addTask(subSDK3);
 
         var epicAsync = new Epic( "Асинхронный код",
-                "Всё что касается асинхронного кода", new ArrayList<>());
+                "Всё что касается асинхронного кода");
         taskManager.addTask(epicAsync);
 
         //taskManager.getTaskById(taskSound.getId());

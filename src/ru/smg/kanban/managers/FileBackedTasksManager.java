@@ -6,12 +6,14 @@ import ru.smg.kanban.tasks.Subtask;
 import ru.smg.kanban.tasks.Task;
 
 import java.io.*;
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
 public class FileBackedTasksManager extends InMemoryTaskManager {
 
-    private static final String firstLine = "id,type,name,status,description,epic\n";
+    private static final String firstLine = "id,type,name,status,description,duration,epic\n";
     private final File saveFile;
 
     public FileBackedTasksManager(HistoryManager manager, File saveFile) {
@@ -45,7 +47,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
                 "Добавить поддержку портретного и горизонтального режимов экрана", Status.NEW);
         taskManager.addTask(taskUI);
 
-        var epicSDK = new Epic("SDK Яндекс игр", "Интегрировать SDK Яндекс игр", new ArrayList<>());
+        var epicSDK = new Epic("SDK Яндекс игр", "Интегрировать SDK Яндекс игр");
         taskManager.addTask(epicSDK);
 
         var subSDK1 = new Subtask("Изучить документацию",
@@ -61,8 +63,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
                 "Добавить сохранение прогресса", Status.NEW, epicSDK);
         taskManager.addTask(subSDK3);
 
-        var epicAsync = new Epic("Асинхронный код",
-                "Всё что касается асинхронного кода", new ArrayList<>());
+        var epicAsync = new Epic("Асинхронный код", "Всё что касается асинхронного кода");
         taskManager.addTask(epicAsync);
 
         taskManager.getTaskById(taskSound.getId());
@@ -148,7 +149,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
             while (!line.isBlank()) {
                 var task = fromString(line);
                 if (task != null) {
-                    loadTask(task);
+                    super.addTask(task);
                 }
                 line = lineReader.readLine();
             }
@@ -169,13 +170,6 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
         } catch (IOException e) {
             e.printStackTrace();
             throw new ManagerSaveException();
-        }
-    }
-
-    private void loadTask(Task task) {
-        super.addTask(task);
-        if (nextId <= task.getId()) {
-            nextId = task.getId() + 1;
         }
     }
 
@@ -219,19 +213,27 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
             return null;
         }
 
-        StringBuilder description = new StringBuilder();
-        boolean isTask = "TASK".equals(split[1]);
-        if (isTask || "EPIC".equals(split[1])) {
-            for (int i = 4; i < split.length; i++) {
-                description.append(split[i]);
+        Duration duration = Duration.ofMinutes(Integer.parseInt(split[5]));
+        LocalDateTime startTime = LocalDateTime.parse(split[6], Task.formatter);
+        String description = split[4];
+        switch (split[1]) {
+            case "TASK" : {
+                var task = new Task(id, name, description, status);
+                task.setDuration(duration);
+                task.setStartTime(startTime);
+                return task;
             }
-            return isTask ? new Task(id, name, description.toString(), status) :
-                            new Epic(id, name, description.toString(), new ArrayList<>());
+            case "EPIC" : {
+                return new Epic(id, name, description);
+            }
+            case "SUBTASK" : {
+                int epicId = Integer.parseInt(split[split.length - 1]);
+                var subtask = new Subtask(id, name, description, status, (Epic) getTask(epicId));
+                subtask.setDuration(duration);
+                subtask.setStartTime(startTime);
+                return subtask;
+            }
+            default: return null;
         }
-        for (int i = 4; i < split.length - 1; i++) {
-            description.append(split[i]);
-        }
-        int epicId = Integer.parseInt(split[split.length - 1]);
-        return new Subtask(id, name, description.toString(), status, (Epic) getTask(epicId));
     }
 }

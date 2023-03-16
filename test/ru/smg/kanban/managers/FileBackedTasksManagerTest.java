@@ -11,6 +11,8 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -50,7 +52,7 @@ class FileBackedTasksManagerTest extends TaskManagerTest<FileBackedTasksManager>
 
         clearSaveFile();
 
-        Epic epic = new Epic("Epic 1", "Description", new ArrayList<>());
+        Epic epic = new Epic("Epic 1", "Description");
         taskManager.addTask(epic);
         restoredManager = FileBackedTasksManager.loadFromFile(saveFile);
         assertNotNull(restoredManager, "Менеджер не восстановился.");
@@ -61,9 +63,15 @@ class FileBackedTasksManagerTest extends TaskManagerTest<FileBackedTasksManager>
         makeManager();
 
         Task task1 = new Task("Task 1", "Description", Status.NEW);
+        task1.setDuration(Duration.ofMinutes(30));
+        task1.setStartTime(LocalDateTime.now());
         Task task2 = new Task("Task 2", "Description", Status.NEW);
-        Epic epic1 = new Epic("Epic 1", "Description", new ArrayList<>());
+        task2.setDuration(Duration.ofMinutes(45));
+        task2.setStartTime(LocalDateTime.now().plusHours(2));
+        Epic epic1 = new Epic("Epic 1", "Description");
         Subtask subtask1 = new Subtask("Subtask 1", "Description", Status.NEW, epic1);
+        subtask1.setDuration(Duration.ofMinutes(15));
+        subtask1.setStartTime(LocalDateTime.now().plusHours(5));
 
         int task1Index = taskManager.addTask(task1);
         int task2Index = taskManager.addTask(task2);

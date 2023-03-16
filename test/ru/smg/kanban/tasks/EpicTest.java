@@ -3,7 +3,8 @@ package ru.smg.kanban.tasks;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import java.util.ArrayList;
+import java.time.Duration;
+import java.time.LocalDateTime;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -13,7 +14,7 @@ class EpicTest {
 
     @BeforeEach
     public void makeEpic() {
-        epic = new Epic("My epic", "Epic description", new ArrayList<>());
+        epic = new Epic("My epic", "Epic description");
     }
 
 
@@ -24,36 +25,74 @@ class EpicTest {
 
     @Test
     void epicWithAllNewSubtasksStatusShouldBeNew() {
-        epic.getSubtasks().add(new Subtask("Subtask 1", "Description", Status.NEW, epic));
-        epic.getSubtasks().add(new Subtask("Subtask 2", "Description", Status.NEW, epic));
+        epic.addSubtask(new Subtask("Subtask 1", "Description", Status.NEW, epic));
+        epic.addSubtask(new Subtask("Subtask 2", "Description", Status.NEW, epic));
         assertEquals(Status.NEW, epic.getStatus());
     }
 
     @Test
     void epicWithAllDoneSubtasksShouldBeDone() {
-        epic.getSubtasks().add(new Subtask("Subtask 1", "Description", Status.DONE, epic));
-        epic.getSubtasks().add(new Subtask("Subtask 2", "Description", Status.DONE, epic));
+        epic.addSubtask(new Subtask("Subtask 1", "Description", Status.DONE, epic));
+        epic.addSubtask(new Subtask("Subtask 2", "Description", Status.DONE, epic));
         assertEquals(Status.DONE, epic.getStatus());
     }
 
     @Test
     void epicWithNewAndDoneSubtasksShouldBeInProgress() {
-        epic.getSubtasks().add(new Subtask("Subtask 1", "Description", Status.NEW, epic));
-        epic.getSubtasks().add(new Subtask("Subtask 2", "Description", Status.DONE, epic));
+        epic.addSubtask(new Subtask("Subtask 1", "Description", Status.NEW, epic));
+        epic.addSubtask(new Subtask("Subtask 2", "Description", Status.DONE, epic));
         assertEquals(Status.IN_PROGRESS, epic.getStatus());
     }
 
     @Test
     void epicWithAllInProgressSubtasksShouldBeInProgress() {
-        epic.getSubtasks().add(new Subtask("Subtask 1", "Description", Status.IN_PROGRESS, epic));
-        epic.getSubtasks().add(new Subtask("Subtask 2", "Description", Status.IN_PROGRESS, epic));
+        epic.addSubtask(new Subtask("Subtask 1", "Description", Status.IN_PROGRESS, epic));
+        epic.addSubtask(new Subtask("Subtask 2", "Description", Status.IN_PROGRESS, epic));
         assertEquals(Status.IN_PROGRESS, epic.getStatus());
     }
 
     @Test
     void toStringTest() {
-        epic.getSubtasks().add(new Subtask("Subtask 1", "Description", Status.NEW, epic));
+        epic.addSubtask(new Subtask("Subtask 1", "Description", Status.NEW, epic));
         String value =  "[0 epic] My epic(Epic description) [NEW]\n    [0 sub] Subtask 1(Description) [NEW]\n";
         assertEquals(value, epic.toString());
+    }
+
+    @Test
+    void epicDurationShouldBeSumOfSubtasks() {
+        var sub1 = new Subtask(0, "Subtask 1", "Description", Status.NEW, epic);
+        sub1.setDuration(Duration.ofMinutes(30));
+        var sub2 = new Subtask(1, "Subtask 2", "Description", Status.NEW, epic);
+        sub2.setDuration(Duration.ofMinutes(15));
+        epic.addSubtask(sub1);
+        epic.addSubtask(sub2);
+        assertEquals(45, epic.getDuration().toMinutes(), "Длительность не верная.");
+    }
+
+    @Test
+    void epicStartEndTimeShouldBeFromSubtasks() {
+        var sub1 = new Subtask("Subtask 1", "Description", Status.NEW, epic);
+        LocalDateTime startTime = LocalDateTime.now();
+        sub1.setStartTime(startTime);
+        var sub2 = new Subtask("Subtask 2", "Description", Status.NEW, epic);
+        sub2.setStartTime(startTime.plusMinutes(30));
+        var sub3 = new Subtask("Subtask 3", "Description", Status.NEW, epic);
+        LocalDateTime endTime = startTime.plusMinutes(50);
+        sub3.setStartTime(endTime);
+        sub3.setDuration(Duration.ofMinutes(50));
+        epic.addSubtask(sub1);
+        epic.addSubtask(sub2);
+        epic.addSubtask(sub3);
+        assertEquals(startTime, epic.getStartTime(), "Начальное время неверное.");
+        assertEquals(sub3.getEndTime(), epic.getEndTime(), "Конечное время неверное.");
+    }
+
+    @Test
+    void removeSubtask() {
+        var sub1 = new Subtask("Subtask 1", "Description", Status.NEW, epic);
+        epic.addSubtask(sub1);
+        assertEquals(1, epic.getSubtasks().size(), "Подзадача не добавилась.");
+        epic.removeSubtask(sub1);
+        assertEquals(0, epic.getSubtasks().size(), "Подзадача не удалилась.");
     }
 }

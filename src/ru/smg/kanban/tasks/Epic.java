@@ -1,25 +1,29 @@
 package ru.smg.kanban.tasks;
 
-import java.util.ArrayList;
+import java.time.Duration;
+import java.time.LocalDateTime;
+import java.util.*;
 
 public class Epic extends Task {
-
-    public ArrayList<Subtask> getSubtasks() {
-        return subtasks;
-    }
-
     private final ArrayList<Subtask> subtasks;
+    private LocalDateTime endTime;
 
-    public Epic(int id, String name, String description, ArrayList<Subtask> subtasks) {
-        super(id, name, description, Status.NEW);
-        this.subtasks = subtasks;
-        taskType = TaskType.EPIC;
+    public List<Subtask> getSubtasks() {
+        return List.copyOf(subtasks); //TODO probably should cache it
     }
 
-    public Epic(String name, String description, ArrayList<Subtask> subtasks) {
-        super(name, description, Status.NEW);
-        this.subtasks = subtasks;
+    public Epic(int id, String name, String description ) {
+        super(id, name, description, Status.NEW);
+        this.subtasks = new ArrayList<>();
         taskType = TaskType.EPIC;
+        updateTimings();
+    }
+
+    public Epic(String name, String description) {
+        super(name, description, Status.NEW);
+        this.subtasks = new ArrayList<>();
+        taskType = TaskType.EPIC;
+        updateTimings();
     }
 
     @Override
@@ -34,6 +38,57 @@ public class Epic extends Task {
     @Override
     protected String getToStringPrefix() {
         return "[" + getId() + " epic] ";
+    }
+
+    @Override
+    public void setDuration(Duration duration) {}
+    @Override
+    public void setStartTime(LocalDateTime startTime) {}
+
+    public void addSubtask(Subtask subtask) {
+        if (!subtasks.contains(subtask)) {
+            subtasks.add(subtask);
+        }
+        updateTimings();
+    }
+
+    public void removeSubtask(Subtask subtask) {
+        subtasks.remove(subtask);
+        updateTimings();
+    }
+
+    public void updateSubtask(Subtask subtask) {
+
+        Subtask oldSubtask = subtasks.stream()
+                .filter(sub -> sub.getId() == subtask.getId())
+                .findFirst()
+                .orElse(null);
+
+        if (oldSubtask != null) {
+            subtasks.remove(oldSubtask);
+            subtasks.add(subtask);
+        }
+    }
+
+    private void updateTimings() {
+        if (subtasks.isEmpty()) {
+            duration = Duration.ZERO;
+            startTime = LocalDateTime.now();
+            endTime = LocalDateTime.now();
+            return;
+        }
+        duration = subtasks.stream()
+                .map(s -> s.duration)
+                .reduce(Duration.ZERO, Duration::plus);
+
+        subtasks.sort(Comparator.comparing(Task::getStartTime));
+        startTime = subtasks.get(0).startTime;
+        endTime = subtasks.get(subtasks.size() - 1).getEndTime();
+    }
+
+    @Override
+    public LocalDateTime getEndTime() {
+        return endTime;
     }
 
     @Override

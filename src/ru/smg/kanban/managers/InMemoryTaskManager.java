@@ -1,19 +1,19 @@
 package ru.smg.kanban.managers;
 
 import ru.smg.kanban.tasks.Epic;
-import ru.smg.kanban.tasks.Status;
 import ru.smg.kanban.tasks.Subtask;
 import ru.smg.kanban.tasks.Task;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
+
 
 public class InMemoryTaskManager implements TaskManager {
     protected final HistoryManager historyManager;
     private final HashMap<Integer, Task> tasks;
     private final HashMap<Integer, Task> epics;
     private final HashMap<Integer, Task> subTasks;
+    
+    private final TreeSet<Task> sortedTasks;
     protected int nextId = 0;
 
     public InMemoryTaskManager(HistoryManager manager) {
@@ -21,6 +21,7 @@ public class InMemoryTaskManager implements TaskManager {
         epics = new HashMap<>();
         subTasks = new HashMap<>();
         historyManager = manager;
+        sortedTasks = new TreeSet<>(Comparator.comparing(Task::getStartTime));
     }
 
     @Override
@@ -40,7 +41,11 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public void clearAllTasks() {
-        tasks.values().forEach(t -> historyManager.remove(t.getId()));
+
+        tasks.values().forEach(t -> {
+           historyManager.remove(t.getId());
+           sortedTasks.remove(t);} );
+
         tasks.clear();
     }
 
@@ -52,16 +57,19 @@ public class InMemoryTaskManager implements TaskManager {
         }
         subTasks.clear();
         epics.clear();
+        sortedTasks.removeIf(t -> t instanceof Epic || t instanceof Subtask);
     }
 
     @Override
     public void clearAllSubtasks() {
-        for (Task epic : epics.values()) {
-            var subtasks = ((Epic) epic).getSubtasks();
+        for (Task task : epics.values()) {
+            var epic = (Epic)task;
+            var subtasks = epic.getSubtasks();
             subtasks.forEach(st -> historyManager.remove(st.getId()));
-            subtasks.clear();
+            subtasks.forEach(epic::removeSubtask);
         }
         subTasks.clear();
+        sortedTasks.removeIf(t -> t instanceof Subtask);
     }
 
     protected void logHistory(Task task) {
@@ -105,13 +113,43 @@ public class InMemoryTaskManager implements TaskManager {
         if (task == null) {
             return -1;
         }
-        task.setId(nextId++);
+        task.setId(nextId);
+        if (!sortedTasks.isEmpty() && sortedTasks.last().getStartTime().isEqual(task.getEndTime())){
+            task.setStartTime(task.getStartTime().plusNanos(1));
+        }
+        if (overlaps(task)) {
+            System.out.println("Задача не была добавлена из-за пересечения по времени.");
+            return -1;
+        }
         if (task instanceof Subtask) {
             var subtask = (Subtask) task;
-            subtask.getHolder().getSubtasks().add(subtask);
+            subtask.getHolder().addSubtask(subtask);
         }
         getHashMap(task).put(task.getId(), task);
+        sortedTasks.add(task);
+        nextId++;
         return task.getId();
+    }
+
+    private boolean overlaps(Task task) {
+        if (task.getDuration().isZero()) return false;
+        for (Iterator<Task> it = getPrioritizedTasks(); it.hasNext(); ) {
+            var t = it.next();
+            if (task.getId() == t.getId()) return false;
+            if (task.getStartTime().isAfter(t.getEndTime())) continue;
+
+            if (checkTimeOverlap(t, task)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean checkTimeOverlap(Task task1, Task task2) {
+        boolean task1IsBefore = task1.getEndTime().isBefore(task2.getStartTime());
+        if (task1IsBefore) return false;
+
+        return !(task1.getStartTime().isAfter(task2.getEndTime()));
     }
 
     @Override
@@ -121,15 +159,13 @@ public class InMemoryTaskManager implements TaskManager {
             addTask(task);
             return;
         }
+        if(overlaps(task)) {
+            System.out.println("Задача не была добавлена из-за пересечения по времени.");
+            return;
+        }
         if (task instanceof Subtask) {
             var subtask = (Subtask) task;
-            ArrayList<Subtask> subtasks = subtask.getHolder().getSubtasks();
-            for (int i = 0; i < subtasks.size(); i++) {
-                if (subtask.getId() == subtasks.get(i).getId()) {
-                    subtasks.set(i, subtask);
-                    break;
-                }
-            }
+            subtask.getHolder().updateSubtask(subtask);
         }
         map.put(task.getId(), task);
     }
@@ -138,28 +174,29 @@ public class InMemoryTaskManager implements TaskManager {
     public void deleteTask(Task task) {
         var map = getHashMap(task);
         if (task instanceof Epic) {
-
-            for (Subtask subtask : ((Epic) task).getSubtasks()) {
-                var subtaskMap = getHashMap(subtask);
-                subtaskMap.remove(subtask.getId());
+            Epic epic = (Epic)task;
+            for (Subtask subtask : epic.getSubtasks()) {
+                getHashMap(subtask).remove(subtask.getId());
                 historyManager.remove(subtask.getId());
             }
         }
         if (task instanceof Subtask) {
-            ((Subtask) task).getHolder().getSubtasks().remove(task);
+            var subtask = (Subtask)task;
+            subtask.getHolder().removeSubtask(subtask);
         }
         map.remove(task.getId());
+        sortedTasks.remove(task);
         historyManager.remove(task.getId());
-    }
-
-    @Override
-    public ArrayList<Subtask> getSubtasks(Epic epic) {
-        return epic.getSubtasks();
     }
 
     @Override
     public List<Task> getHistory() {
         return historyManager.getHistory();
+    }
+
+    @Override
+    public Iterator<Task> getPrioritizedTasks() {
+        return sortedTasks.iterator();
     }
 
     private HashMap<Integer, Task> getHashMap(Task task) {

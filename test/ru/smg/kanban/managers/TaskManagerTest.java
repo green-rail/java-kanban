@@ -6,7 +6,10 @@ import ru.smg.kanban.tasks.Status;
 import ru.smg.kanban.tasks.Subtask;
 import ru.smg.kanban.tasks.Task;
 
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -41,8 +44,8 @@ abstract class TaskManagerTest <T extends TaskManager> {
         assertNotNull(allEpics, "Задачи не возвращаются.");
         assertTrue(allEpics.isEmpty(), "Список задач не пуст." );
 
-        var epic = new Epic("Epic 1", "Description", new ArrayList<>());
-        epic.getSubtasks().add(new Subtask("Subtask 1", "Description", Status.DONE, epic));
+        var epic = new Epic("Epic 1", "Description");
+        epic.addSubtask(new Subtask("Subtask 1", "Description", Status.DONE, epic));
         taskManager.addTask(epic);
 
         final List<Task> epics = taskManager.getAllEpics();
@@ -59,7 +62,7 @@ abstract class TaskManagerTest <T extends TaskManager> {
         assertNotNull(allSubtasks, "Задачи не возвращаются.");
         assertTrue(allSubtasks.isEmpty(), "Список задач не пуст." );
 
-        var epic = new Epic("Epic 1", "Description", new ArrayList<>());
+        var epic = new Epic("Epic 1", "Description");
         taskManager.addTask(epic);
         var subtask = new Subtask("Subtask 1", "Description", Status.DONE, epic);
         taskManager.addTask(subtask);
@@ -84,7 +87,7 @@ abstract class TaskManagerTest <T extends TaskManager> {
 
     @Test
     void clearAllEpics() {
-        var epic = new Epic("Epic 1", "Description", new ArrayList<>());
+        var epic = new Epic("Epic 1", "Description");
         taskManager.addTask(epic);
         var subtask = new Subtask("Subtask 1", "Description", Status.DONE, epic);
         taskManager.addTask(subtask);
@@ -96,7 +99,7 @@ abstract class TaskManagerTest <T extends TaskManager> {
 
     @Test
     void clearAllSubtasks() {
-        var epic = new Epic("Epic 1", "Description", new ArrayList<>());
+        var epic = new Epic("Epic 1", "Description");
         taskManager.addTask(epic);
         var subtask = new Subtask("Subtask 1", "Description", Status.DONE, epic);
         taskManager.addTask(subtask);
@@ -121,7 +124,7 @@ abstract class TaskManagerTest <T extends TaskManager> {
     void getEpicById() {
         assertNull(taskManager.getEpicById(0), "Список задач должен быть пуст.");
 
-        var epic = new Epic("Epic 1", "Description", new ArrayList<>());
+        var epic = new Epic("Epic 1", "Description");
         int index = taskManager.addTask(epic);
         assertNotNull(taskManager.getEpicById(index), "Задача не возвращается.");
         assertEquals(epic, taskManager.getEpicById(index), "Вернулась не та задача.");
@@ -133,7 +136,7 @@ abstract class TaskManagerTest <T extends TaskManager> {
     void getSubtaskById() {
         assertNull(taskManager.getSubtaskById(0), "Список задач должен быть пуст.");
 
-        var epic = new Epic("Epic 1", "Description", new ArrayList<>());
+        var epic = new Epic("Epic 1", "Description");
         var subtask = new Subtask("Subtask 1", "Description", Status.NEW, epic);
         int index = taskManager.addTask(subtask);
         assertNotNull(taskManager.getSubtaskById(index), "Задача не возвращается.");
@@ -158,6 +161,46 @@ abstract class TaskManagerTest <T extends TaskManager> {
         assertEquals(task, tasks.get(0), "Задачи не совпадают.");
     }
 
+    @Test
+    void shouldntAddOverlappingTask() {
+        Task task1 = new Task("Task 1", "Description", Status.NEW);
+        task1.setStartTime(LocalDateTime.now());
+        task1.setDuration(Duration.ofMinutes(15));
+        taskManager.addTask(task1);
+        assertEquals(1, taskManager.getAllTasks().size(), "Задача не добавилась.");
+        Task task2 = new Task("Task 2", "Description", Status.NEW);
+        task2.setStartTime(LocalDateTime.now().plusMinutes(5));
+        task2.setDuration(Duration.ofMinutes(15));
+        taskManager.addTask(task2);
+        assertEquals(1, taskManager.getAllTasks().size(), "Задача добавилась.");
+    }
+
+    @Test
+    void shouldntUpdateOverlappingTask() {
+        Task task0 = new Task("Task 0", "Description", Status.NEW);
+        task0.setStartTime(LocalDateTime.now());
+        task0.setDuration(Duration.ofMinutes(10));
+        taskManager.addTask(task0);
+
+        Task task1 = new Task("Task 1", "Description", Status.NEW);
+        task1.setStartTime(LocalDateTime.now().plusMinutes(20));
+        task1.setDuration(Duration.ofMinutes(10));
+        taskManager.addTask(task1);
+
+        Task task2 = new Task("Task 2", "Description", Status.NEW);
+        task2.setStartTime(LocalDateTime.now().plusMinutes(50));
+        task2.setDuration(Duration.ofMinutes(10));
+        taskManager.addTask(task2);
+
+        assertEquals(3, taskManager.getAllTasks().size(), "Задачи не добавилась.");
+
+        task1 = new Task(1, "Task 2", "Updated description", Status.IN_PROGRESS);
+        task1.setStartTime(LocalDateTime.now().plusMinutes(5));
+        task1.setDuration(Duration.ofMinutes(80));
+        taskManager.updateTask(task1);
+        assertNotEquals(task1, taskManager.getAllTasks().get(1), "Задача добавилась.");
+    }
+
 
     @Test
     void updateTask() {
@@ -172,10 +215,11 @@ abstract class TaskManagerTest <T extends TaskManager> {
         assertNotNull(taskManager.getTaskById(taskId), "Задача не найдена.");
         assertEquals(newTask, taskManager.getTaskById(taskId), "Задачи не совпадают.");
 
-        Epic epic = new Epic("Epic 1", "Description", new ArrayList<>());
+        Epic epic = new Epic("Epic 1", "Description");
         final int epicId = taskManager.addTask(epic);
 
-        Epic newEpic = new Epic(epicId, epic.getName(),  "Updated description", epic.getSubtasks());
+        Epic newEpic = new Epic(epicId, epic.getName(),  "Updated description");
+        //epic.getSubtasks().forEach(newEpic::addSubtask);
 
         taskManager.updateTask(newEpic);
 
@@ -208,7 +252,7 @@ abstract class TaskManagerTest <T extends TaskManager> {
 
         assertTrue(taskManager.getAllTasks().isEmpty(), "Задача не удалилась.");
 
-        Epic epic = new Epic("Epic 1", "Description", new ArrayList<>());
+        Epic epic = new Epic("Epic 1", "Description");
         final int epicId = taskManager.addTask(epic);
         Subtask subtask1 = new Subtask("Subtask 1", "Description", Status.NEW, epic);
         Subtask subtask2 = new Subtask("Subtask 2", "Description", Status.NEW, epic);
@@ -236,5 +280,22 @@ abstract class TaskManagerTest <T extends TaskManager> {
         taskManager.getTaskById(taskId);
 
         assertEquals(1, taskManager.getHistory().size(), "История не сохранилась.");
+    }
+
+    @Test
+    void getPrioritizedTasks() {
+        var task1 = new Task("Task 1", "Description", Status.NEW);
+        task1.setStartTime(LocalDateTime.now().plusMinutes(100));
+        var task2 = new Task("Task 2", "Description", Status.NEW);
+        task2.setStartTime(LocalDateTime.now().plusMinutes(50));
+        var task3 = new Task("Task 3", "Description", Status.NEW);
+        task3.setStartTime(LocalDateTime.now());
+        taskManager.addTask(task1);
+        taskManager.addTask(task2);
+        taskManager.addTask(task3);
+        List<Task> sortedTasks = List.of(task3, task2, task1);
+        assertIterableEquals(sortedTasks, (Iterable<Task>) () -> taskManager.getPrioritizedTasks(),
+                "Задачи не отсортированы по приоритету.");
+
     }
 }
