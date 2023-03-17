@@ -2,6 +2,8 @@ package ru.smg.kanban.tasks;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -9,7 +11,6 @@ import java.time.LocalDateTime;
 import static org.junit.jupiter.api.Assertions.*;
 
 class EpicTest {
-
     private Epic epic;
 
     @BeforeEach
@@ -17,24 +18,17 @@ class EpicTest {
         epic = new Epic("My epic", "Epic description");
     }
 
-
     @Test
     void epicWithEmptySubtasksStatusShouldBeNew() {
         assertEquals(Status.NEW, epic.getStatus());
     }
 
-    @Test
-    void epicWithAllNewSubtasksStatusShouldBeNew() {
-        epic.addSubtask(new Subtask("Subtask 1", "Description", Status.NEW, epic));
-        epic.addSubtask(new Subtask("Subtask 2", "Description", Status.NEW, epic));
-        assertEquals(Status.NEW, epic.getStatus());
-    }
-
-    @Test
-    void epicWithAllDoneSubtasksShouldBeDone() {
-        epic.addSubtask(new Subtask("Subtask 1", "Description", Status.DONE, epic));
-        epic.addSubtask(new Subtask("Subtask 2", "Description", Status.DONE, epic));
-        assertEquals(Status.DONE, epic.getStatus());
+    @ParameterizedTest
+    @EnumSource(Status.class)
+    void epicWithSameSubtasksShouldMatchStatus(Status status) {
+        epic.addSubtask(new Subtask("Subtask 1", "Description", status, epic));
+        epic.addSubtask(new Subtask("Subtask 2", "Description", status, epic));
+        assertEquals(status, epic.getStatus());
     }
 
     @Test
@@ -43,18 +37,10 @@ class EpicTest {
         epic.addSubtask(new Subtask("Subtask 2", "Description", Status.DONE, epic));
         assertEquals(Status.IN_PROGRESS, epic.getStatus());
     }
-
-    @Test
-    void epicWithAllInProgressSubtasksShouldBeInProgress() {
-        epic.addSubtask(new Subtask("Subtask 1", "Description", Status.IN_PROGRESS, epic));
-        epic.addSubtask(new Subtask("Subtask 2", "Description", Status.IN_PROGRESS, epic));
-        assertEquals(Status.IN_PROGRESS, epic.getStatus());
-    }
-
     @Test
     void toStringTest() {
         epic.addSubtask(new Subtask("Subtask 1", "Description", Status.NEW, epic));
-        String value =  "[0 epic] My epic(Epic description) [NEW]\n    [0 sub] Subtask 1(Description) [NEW]\n";
+        String value =  "[-1 epic] My epic(Epic description) [NEW]\n    [-1 sub] Subtask 1(Description) [NEW]\n";
         assertEquals(value, epic.toString());
     }
 

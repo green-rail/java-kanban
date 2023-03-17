@@ -8,6 +8,19 @@ public class Epic extends Task {
     private final ArrayList<Subtask> subtasks;
     private LocalDateTime endTime;
 
+    private LocalDateTime calculatedStartTime;
+    private Duration calculatedDuration;
+
+    @Override
+    public LocalDateTime getStartTime() {
+        return calculatedStartTime;
+    }
+
+    @Override
+    public Duration getDuration() {
+        return calculatedDuration;
+    }
+
     public List<Subtask> getSubtasks() {
         return List.copyOf(subtasks); //TODO probably should cache it
     }
@@ -36,19 +49,13 @@ public class Epic extends Task {
     }
 
     @Override
-    protected String getToStringPrefix() {
-        return "[" + getId() + " epic] ";
-    }
-
-    @Override
-    public void setDuration(Duration duration) {}
-    @Override
-    public void setStartTime(LocalDateTime startTime) {}
+    protected String getToStringPrefix() {return "[" + getId() + " epic] ";}
 
     public void addSubtask(Subtask subtask) {
-        if (!subtasks.contains(subtask)) {
-            subtasks.add(subtask);
-        }
+
+        if (subtasks.contains(subtask)) return;
+
+        subtasks.add(subtask);
         updateTimings();
     }
 
@@ -64,25 +71,26 @@ public class Epic extends Task {
                 .findFirst()
                 .orElse(null);
 
-        if (oldSubtask != null) {
-            subtasks.remove(oldSubtask);
-            subtasks.add(subtask);
-        }
+        if (oldSubtask == null) return;
+
+        subtasks.remove(oldSubtask);
+        subtasks.add(subtask);
+        updateTimings();
     }
 
     private void updateTimings() {
         if (subtasks.isEmpty()) {
-            duration = Duration.ZERO;
-            startTime = LocalDateTime.now();
+            calculatedDuration = Duration.ZERO;
+            calculatedStartTime = LocalDateTime.now();
             endTime = LocalDateTime.now();
             return;
         }
-        duration = subtasks.stream()
+        calculatedDuration = subtasks.stream()
                 .map(s -> s.duration)
                 .reduce(Duration.ZERO, Duration::plus);
 
         subtasks.sort(Comparator.comparing(Task::getStartTime));
-        startTime = subtasks.get(0).startTime;
+        calculatedStartTime = subtasks.get(0).startTime;
         endTime = subtasks.get(subtasks.size() - 1).getEndTime();
     }
 

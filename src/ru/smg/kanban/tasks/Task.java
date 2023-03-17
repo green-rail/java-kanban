@@ -3,14 +3,19 @@ package ru.smg.kanban.tasks;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Objects;
 
 public class Task {
 
-    public int getId() {
-        return id;
-    }
-    public void setId(int id){
-        this.id = id;
+    private final int id;
+    private String name;
+    private String description;
+    private Status status;
+    protected Duration duration;
+    protected LocalDateTime startTime;
+    protected TaskType taskType;
+
+    public int getId() {return id;
     }
 
     public String getName() {
@@ -35,13 +40,6 @@ public class Task {
     }
 
 
-    protected TaskType taskType;
-    private int id;
-    private String name;
-    private String description;
-    private Status status;
-    protected Duration duration;
-    protected LocalDateTime startTime;
 
     public static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy_MM_dd_HH_mm");
 
@@ -66,6 +64,7 @@ public class Task {
     }
 
     public Task(String name, String description, Status status) {
+        this.id = -1;
         this.name = name;
         this.description = description;
         this.status = status;
@@ -96,5 +95,18 @@ public class Task {
     public String serialize() {
         return String.format("%s,%s,%s,%s,%s,%s,%s", id, taskType, name, status, description,duration.toMinutes(),
                 startTime.format(formatter));
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Task task = (Task) o;
+        return id == task.id && name.equals(task.name) && description.equals(task.description) && status == task.status && duration.equals(task.duration);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, name, description, status, duration);
     }
 }

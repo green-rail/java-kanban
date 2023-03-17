@@ -9,55 +9,70 @@ public class Main {
     public static void main(String[] args) {
         TaskManager taskManager = Managers.getDefault();
 
-        var taskSound = new Task( "Добавить звук",
-                "Звуки ui; выигрыша; проигрыша; фоновая музыка", Status.NEW);
-        taskManager.addTask(taskSound);
+        int taskSoundId = taskManager.addTask(new Task(
+                "Добавить звук",
+                "Звуки ui; выигрыша; проигрыша; фоновая музыка",
+                Status.NEW
+        ));
 
-        var taskUI = new Task("Адаптивный ui",
-                "Добавить поддержку портретного и горизонтального режимов экрана", Status.NEW);
-        taskManager.addTask(taskUI);
+        int taskUIId = taskManager.addTask( new Task(
+                "Адаптивный ui",
+                "Добавить поддержку портретного и горизонтального режимов экрана",
+                Status.NEW
+        ));
 
-        var epicSDK = new Epic("SDK Яндекс игр", "Интегрировать SDK Яндекс игр");
-        taskManager.addTask(epicSDK);
+        int epicSDKId = taskManager.addTask( new Epic(
+                "SDK Яндекс игр",
+                "Интегрировать SDK Яндекс игр"
+        ));
 
-        var subSDK1 = new Subtask("Изучить документацию",
-                "За последнее время SDK обновился нужно быть в курсе изменений", Status.NEW, epicSDK);
-        taskManager.addTask(subSDK1);
-
-        var subSDK2 = new Subtask("Лидерборд",
+        int subSDK1Id = taskManager.addTask( new Subtask(
+                "Изучить документацию",
+                "За последнее время SDK обновился нужно быть в курсе изменений",
+                Status.NEW,
+                taskManager.getEpicById(epicSDKId)
+        ));
+        int subSDK2Id = taskManager.addTask( new Subtask(
+                "Лидерборд",
                 "Оценить сложность реализации. Если сложно то целесообразность фичи под вопросом",
-                Status.NEW,  epicSDK);
-        taskManager.addTask(subSDK2);
+                Status.NEW,
+                taskManager.getEpicById(epicSDKId)
+        ));
 
-        var subSDK3 = new Subtask("Облачные сейвы",
-                "Добавить сохранение прогресса", Status.NEW, epicSDK);
-        taskManager.addTask(subSDK3);
+        int subSDK3 = taskManager.addTask(new Subtask(
+                "Облачные сейвы",
+                "Добавить сохранение прогресса",
+                Status.NEW,
+                taskManager.getEpicById(epicSDKId)
+        ));
 
-        var epicAsync = new Epic( "Асинхронный код",
-                "Всё что касается асинхронного кода");
-        taskManager.addTask(epicAsync);
+        int epicAsyncId = taskManager.addTask(new Epic(
+                "Асинхронный код",
+                "Всё что касается асинхронного кода"
+        ));
+
 
         //taskManager.getTaskById(taskSound.getId());
         taskManager.getTaskById(500);
-        taskManager.getTaskById(taskSound.getId());
+        taskManager.getTaskById(taskSoundId);
         printHistory(taskManager);
 
-        taskManager.getSubtaskById(subSDK1.getId());
-        taskManager.getSubtaskById(subSDK2.getId());
+        taskManager.getSubtaskById(subSDK1Id);
+        taskManager.getSubtaskById(subSDK2Id);
         printHistory(taskManager);
 
-        taskManager.getTaskById(taskUI.getId());
-        taskManager.getEpicById(epicSDK.getId());
-        taskManager.getTaskById(taskUI.getId());
-        taskManager.getEpicById(epicSDK.getId());
+        taskManager.getTaskById(taskUIId);
+        taskManager.getEpicById(epicSDKId);
+        taskManager.getTaskById(taskUIId);
+        taskManager.getEpicById(epicSDKId);
         printHistory(taskManager);
 
         //System.out.println("Удаляем задачу " + taskSound.getId());
         //taskManager.deleteTask(taskSound);
         //printHistory(taskManager);
 
-        System.out.println("Удаляем эпик " + epicSDK.getId());
-        taskManager.deleteTask(epicSDK);
+        System.out.println("Удаляем эпик " + epicSDKId);
+        taskManager.deleteTask(taskManager.getEpicById(epicSDKId));
         printHistory(taskManager);
 
         taskManager.clearAllTasks();
@@ -68,7 +83,6 @@ public class Main {
 
     private static void printHistory(TaskManager manager) {
         System.out.println("\nИстория:");
-        manager.getHistory().forEach(System.out::println);
-        //System.out.println(manager.getHistory());
+        System.out.println(manager.getHistory());
     }
 }

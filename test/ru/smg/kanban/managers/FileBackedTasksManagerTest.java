@@ -62,14 +62,14 @@ class FileBackedTasksManagerTest extends TaskManagerTest<FileBackedTasksManager>
 
         makeManager();
 
-        Task task1 = new Task("Task 1", "Description", Status.NEW);
+        Task task1 = new Task(0, "Task 1", "Description", Status.NEW);
         task1.setDuration(Duration.ofMinutes(30));
         task1.setStartTime(LocalDateTime.now());
-        Task task2 = new Task("Task 2", "Description", Status.NEW);
+        Task task2 = new Task(1,"Task 2", "Description", Status.NEW);
         task2.setDuration(Duration.ofMinutes(45));
         task2.setStartTime(LocalDateTime.now().plusHours(2));
-        Epic epic1 = new Epic("Epic 1", "Description");
-        Subtask subtask1 = new Subtask("Subtask 1", "Description", Status.NEW, epic1);
+        Epic epic1 = new Epic(2, "Epic 1", "Description");
+        Subtask subtask1 = new Subtask(3, "Subtask 1", "Description", Status.NEW, epic1);
         subtask1.setDuration(Duration.ofMinutes(15));
         subtask1.setStartTime(LocalDateTime.now().plusHours(5));
 

@@ -25,8 +25,8 @@ abstract class TaskManagerTest <T extends TaskManager> {
         assertTrue(allTasks.isEmpty(), "Список задач не пуст." );
 
         var taskList = List.of(
-                new Task("Task 1", "Description", Status.NEW),
-                new Task("Task 2", "Description", Status.NEW));
+                new Task(0, "Task 1", "Description", Status.NEW),
+                new Task(1,"Task 2", "Description", Status.NEW));
 
         taskManager.addTask(taskList.get(0));
         taskManager.addTask(taskList.get(1));
@@ -44,9 +44,12 @@ abstract class TaskManagerTest <T extends TaskManager> {
         assertNotNull(allEpics, "Задачи не возвращаются.");
         assertTrue(allEpics.isEmpty(), "Список задач не пуст." );
 
-        var epic = new Epic("Epic 1", "Description");
-        epic.addSubtask(new Subtask("Subtask 1", "Description", Status.DONE, epic));
-        taskManager.addTask(epic);
+        var epic = new Epic(0, "Epic 1", "Description");
+        var subtask = new Subtask(1, "Subtask 1", "Description", Status.DONE, epic);
+        epic.addSubtask(subtask);
+
+        int epicId = taskManager.addTask(epic);
+        int subtaskId = taskManager.addTask(subtask);
 
         final List<Task> epics = taskManager.getAllEpics();
 
@@ -62,9 +65,9 @@ abstract class TaskManagerTest <T extends TaskManager> {
         assertNotNull(allSubtasks, "Задачи не возвращаются.");
         assertTrue(allSubtasks.isEmpty(), "Список задач не пуст." );
 
-        var epic = new Epic("Epic 1", "Description");
-        taskManager.addTask(epic);
-        var subtask = new Subtask("Subtask 1", "Description", Status.DONE, epic);
+        var epic = new Epic(0, "Epic 1", "Description");
+        int epicId = taskManager.addTask(epic);
+        var subtask = new Subtask(1, "Subtask 1", "Description", Status.DONE, taskManager.getEpicById(epicId));
         taskManager.addTask(subtask);
 
         final List<Task> subtasks = taskManager.getAllSubtasks();
@@ -80,16 +83,16 @@ abstract class TaskManagerTest <T extends TaskManager> {
     void clearAllTasks() {
         var task = new Task("Task 1", "Description", Status.NEW);
         taskManager.addTask(task);
+        assertEquals(1, taskManager.getAllTasks().size(), "Задача не добавилась.");
         taskManager.clearAllTasks();
-
         assertTrue(taskManager.getAllTasks().isEmpty(), "Задачи не очищаются");
     }
 
     @Test
     void clearAllEpics() {
-        var epic = new Epic("Epic 1", "Description");
+        var epic = new Epic(0, "Epic 1", "Description");
         taskManager.addTask(epic);
-        var subtask = new Subtask("Subtask 1", "Description", Status.DONE, epic);
+        var subtask = new Subtask("Subtask 1", "Description", Status.DONE, taskManager.getEpicById(0));
         taskManager.addTask(subtask);
         taskManager.clearAllEpics();
 
@@ -113,7 +116,7 @@ abstract class TaskManagerTest <T extends TaskManager> {
     void getTaskById() {
         assertNull(taskManager.getTaskById(0), "Список задач должен быть пуст.");
 
-        var task = new Task("Task 1", "Description", Status.NEW);
+        var task = new Task(0, "Task 1", "Description", Status.NEW);
         int index = taskManager.addTask(task);
         assertNotNull(taskManager.getTaskById(index), "Задача не возвращается.");
         assertEquals(task, taskManager.getTaskById(index), "Вернулась не та задача.");
@@ -124,7 +127,7 @@ abstract class TaskManagerTest <T extends TaskManager> {
     void getEpicById() {
         assertNull(taskManager.getEpicById(0), "Список задач должен быть пуст.");
 
-        var epic = new Epic("Epic 1", "Description");
+        var epic = new Epic(0, "Epic 1", "Description");
         int index = taskManager.addTask(epic);
         assertNotNull(taskManager.getEpicById(index), "Задача не возвращается.");
         assertEquals(epic, taskManager.getEpicById(index), "Вернулась не та задача.");
@@ -136,8 +139,9 @@ abstract class TaskManagerTest <T extends TaskManager> {
     void getSubtaskById() {
         assertNull(taskManager.getSubtaskById(0), "Список задач должен быть пуст.");
 
-        var epic = new Epic("Epic 1", "Description");
-        var subtask = new Subtask("Subtask 1", "Description", Status.NEW, epic);
+        var epic = new Epic(0, "Epic 1", "Description");
+        var subtask = new Subtask(1, "Subtask 1", "Description", Status.NEW, epic);
+        int epicIndex = taskManager.addTask(epic);
         int index = taskManager.addTask(subtask);
         assertNotNull(taskManager.getSubtaskById(index), "Задача не возвращается.");
         assertEquals(subtask, taskManager.getSubtaskById(index), "Вернулась не та задача.");
@@ -146,7 +150,7 @@ abstract class TaskManagerTest <T extends TaskManager> {
 
     @Test
     void addTask() {
-        Task task = new Task("Test addNewTask", "Test addNewTask description", Status.NEW);
+        Task task = new Task(0, "Test addNewTask", "Test addNewTask description", Status.NEW);
         final int taskId = taskManager.addTask(task);
 
         final Task savedTask = taskManager.getTaskById(taskId);
@@ -219,7 +223,6 @@ abstract class TaskManagerTest <T extends TaskManager> {
         final int epicId = taskManager.addTask(epic);
 
         Epic newEpic = new Epic(epicId, epic.getName(),  "Updated description");
-        //epic.getSubtasks().forEach(newEpic::addSubtask);
 
         taskManager.updateTask(newEpic);
 
@@ -244,7 +247,7 @@ abstract class TaskManagerTest <T extends TaskManager> {
     @Test
     void deleteTask() {
 
-        Task task = new Task("Task 1", "Description", Status.NEW);
+        Task task = new Task(0, "Task 1", "Description", Status.NEW);
         assertDoesNotThrow(() -> taskManager.deleteTask(task), "Ошибка при удалении не добавленной задачи.");
         final int taskId = taskManager.addTask(task);
         assertEquals(1, taskManager.getAllTasks().size(), "Задача не добавилась.");
@@ -252,15 +255,17 @@ abstract class TaskManagerTest <T extends TaskManager> {
 
         assertTrue(taskManager.getAllTasks().isEmpty(), "Задача не удалилась.");
 
-        Epic epic = new Epic("Epic 1", "Description");
+        Epic epic = new Epic(1, "Epic 1", "Description");
         final int epicId = taskManager.addTask(epic);
-        Subtask subtask1 = new Subtask("Subtask 1", "Description", Status.NEW, epic);
-        Subtask subtask2 = new Subtask("Subtask 2", "Description", Status.NEW, epic);
+        Subtask subtask1 = new Subtask(2, "Subtask 1", "Description", Status.NEW, taskManager.getEpicById(epicId));
+        Subtask subtask2 = new Subtask(3, "Subtask 2", "Description", Status.NEW, taskManager.getEpicById(epicId));
         taskManager.addTask(subtask1);
         final int sub2Id = taskManager.addTask(subtask2);
 
         assertEquals(1, taskManager.getAllEpics().size(), "Эпик не добавился.");
+        assertEquals(2, taskManager.getEpicById(epicId).getSubtasks().size(), "Подзадачи не добавились в эпик.");
         assertEquals(2, taskManager.getAllSubtasks().size(), "Подзадачи не добавились.");
+        var returnedEpic = taskManager.getEpicById(epicId);
 
         taskManager.deleteTask(subtask2);
         assertNull(taskManager.getSubtaskById(sub2Id), "Задача не удалилась.");
@@ -284,11 +289,11 @@ abstract class TaskManagerTest <T extends TaskManager> {
 
     @Test
     void getPrioritizedTasks() {
-        var task1 = new Task("Task 1", "Description", Status.NEW);
+        var task1 = new Task(0, "Task 1", "Description", Status.NEW);
         task1.setStartTime(LocalDateTime.now().plusMinutes(100));
-        var task2 = new Task("Task 2", "Description", Status.NEW);
+        var task2 = new Task(1, "Task 2", "Description", Status.NEW);
         task2.setStartTime(LocalDateTime.now().plusMinutes(50));
-        var task3 = new Task("Task 3", "Description", Status.NEW);
+        var task3 = new Task(2, "Task 3", "Description", Status.NEW);
         task3.setStartTime(LocalDateTime.now());
         taskManager.addTask(task1);
         taskManager.addTask(task2);

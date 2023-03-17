@@ -149,7 +149,8 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
             while (!line.isBlank()) {
                 var task = fromString(line);
                 if (task != null) {
-                    super.addTask(task);
+                    //super.addTask(task);
+                    super.insertTask(task);
                 }
                 line = lineReader.readLine();
             }

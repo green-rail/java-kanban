@@ -113,29 +113,57 @@ public class InMemoryTaskManager implements TaskManager {
         if (task == null) {
             return -1;
         }
-        task.setId(nextId);
-        if (!sortedTasks.isEmpty() && sortedTasks.last().getStartTime().isEqual(task.getEndTime())){
-            task.setStartTime(task.getStartTime().plusNanos(1));
-        }
-        if (overlaps(task)) {
+        if (overlaps(task, -1)) {
             System.out.println("Задача не была добавлена из-за пересечения по времени.");
             return -1;
         }
+        Task copy;
         if (task instanceof Subtask) {
             var subtask = (Subtask) task;
-            subtask.getHolder().addSubtask(subtask);
+            Task holder = epics.get(subtask.getHolder().getId());
+            if (holder == null) {
+                System.out.println("Подзадача не была добавлена. Эпик не найден.");
+                return -1;
+            }
+            copy = new Subtask(nextId, task.getName(), task.getDescription(), task.getStatus(), (Epic)holder);
+            ((Epic)holder).addSubtask((Subtask) copy);
+        } else if(task instanceof Epic) {
+            copy = new Epic(nextId, task.getName(), task.getDescription());
+        } else {
+            copy = new Task(nextId, task.getName(), task.getDescription(), task.getStatus());
+        }
+        copy.setStartTime(task.getStartTime());
+        copy.setDuration(task.getDuration());
+        if (!sortedTasks.isEmpty() && sortedTasks.last().getStartTime().isEqual(copy.getEndTime())){
+            copy.setStartTime(copy.getStartTime().plusNanos(1));
+        }
+        getHashMap(copy).put(copy.getId(), copy);
+        sortedTasks.add(copy);
+        nextId++;
+        return copy.getId();
+    }
+
+    protected void insertTask(Task task) {
+        if (task.getId() >= nextId) {
+            nextId = task.getId() + 1;
+        }
+        if (task instanceof Subtask) {
+            var subtask = (Subtask) task;
+            Task holder = epics.get(subtask.getHolder().getId());
+            ((Epic)holder).addSubtask((Subtask) task);
+        }
+        if (!sortedTasks.isEmpty() && sortedTasks.last().getStartTime().isEqual(task.getEndTime())){
+            task.setStartTime(task.getStartTime().plusNanos(1));
         }
         getHashMap(task).put(task.getId(), task);
         sortedTasks.add(task);
-        nextId++;
-        return task.getId();
     }
 
-    private boolean overlaps(Task task) {
+    private boolean overlaps(Task task, int id) {
         if (task.getDuration().isZero()) return false;
         for (Iterator<Task> it = getPrioritizedTasks(); it.hasNext(); ) {
             var t = it.next();
-            if (task.getId() == t.getId()) return false;
+            if (id == t.getId()) return false;
             if (task.getStartTime().isAfter(t.getEndTime())) continue;
 
             if (checkTimeOverlap(t, task)) {
@@ -159,7 +187,7 @@ public class InMemoryTaskManager implements TaskManager {
             addTask(task);
             return;
         }
-        if(overlaps(task)) {
+        if(overlaps(task, task.getId())) {
             System.out.println("Задача не была добавлена из-за пересечения по времени.");
             return;
         }
@@ -172,11 +200,15 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public void deleteTask(Task task) {
+        if (task == null) {
+            return;
+        }
         var map = getHashMap(task);
         if (task instanceof Epic) {
-            Epic epic = (Epic)task;
+            Epic epic = (Epic)map.get(task.getId());
             for (Subtask subtask : epic.getSubtasks()) {
                 getHashMap(subtask).remove(subtask.getId());
+                sortedTasks.remove(subtask);
                 historyManager.remove(subtask.getId());
             }
         }
