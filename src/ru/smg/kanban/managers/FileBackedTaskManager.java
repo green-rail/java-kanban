@@ -11,19 +11,19 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-public class FileBackedTasksManager extends InMemoryTaskManager {
+public class FileBackedTaskManager extends InMemoryTaskManager {
 
     private static final String firstLine = "id,type,name,status,description,duration,epic\n";
     private final File saveFile;
 
-    public FileBackedTasksManager(HistoryManager manager, File saveFile) {
+    public FileBackedTaskManager(HistoryManager manager, File saveFile) {
         super(manager);
         this.saveFile = saveFile;
     }
 
-    public static FileBackedTasksManager loadFromFile(File file) {
+    public static FileBackedTaskManager loadFromFile(File file) {
         var historyManager = new InMemoryHistoryManager();
-        var manager = new FileBackedTasksManager(historyManager, file);
+        var manager = new FileBackedTaskManager(historyManager, file);
         manager.load();
         return manager;
     }
@@ -38,7 +38,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
         }
 
 
-        TaskManager taskManager = new FileBackedTasksManager(Managers.getDefaultHistory(), file);
+        TaskManager taskManager = new FileBackedTaskManager(Managers.getDefaultHistory(), file);
         var taskSound = new Task("Добавить звук",
                 "Звуки ui; выигрыша; проигрыша; фоновая музыка", Status.NEW);
         taskManager.addTask(taskSound);
@@ -48,19 +48,19 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
         taskManager.addTask(taskUI);
 
         var epicSDK = new Epic("SDK Яндекс игр", "Интегрировать SDK Яндекс игр");
-        taskManager.addTask(epicSDK);
+        int epicSDKId = taskManager.addTask(epicSDK);
 
         var subSDK1 = new Subtask("Изучить документацию",
-                "За последнее время SDK обновился нужно быть в курсе изменений", Status.NEW, epicSDK);
+                "За последнее время SDK обновился нужно быть в курсе изменений", Status.NEW, epicSDKId);
         taskManager.addTask(subSDK1);
 
         var subSDK2 = new Subtask("Лидерборд",
                 "Оценить сложность реализации. Если сложно то целесообразность фичи под вопросом",
-                Status.NEW,  epicSDK);
+                Status.NEW,  epicSDKId);
         taskManager.addTask(subSDK2);
 
         var subSDK3 = new Subtask("Облачные сейвы",
-                "Добавить сохранение прогресса", Status.NEW, epicSDK);
+                "Добавить сохранение прогресса", Status.NEW, epicSDKId);
         taskManager.addTask(subSDK3);
 
         var epicAsync = new Epic("Асинхронный код", "Всё что касается асинхронного кода");
@@ -82,7 +82,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
         printHistory(taskManager);
 
         System.out.println("Загружаем с диска...");
-        var loadedManager = FileBackedTasksManager.loadFromFile(file);
+        var loadedManager = FileBackedTaskManager.loadFromFile(file);
         printHistory(loadedManager);
     }
 
@@ -215,7 +215,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
         }
 
         Duration duration = Duration.ofMinutes(Integer.parseInt(split[5]));
-        LocalDateTime startTime = LocalDateTime.parse(split[6], Task.formatter);
+        LocalDateTime startTime = LocalDateTime.parse(split[6], Task.startTimeFormatter);
         String description = split[4];
         switch (split[1]) {
             case "TASK" : {
@@ -229,7 +229,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
             }
             case "SUBTASK" : {
                 int epicId = Integer.parseInt(split[split.length - 1]);
-                var subtask = new Subtask(id, name, description, status, (Epic) getTask(epicId));
+                var subtask = new Subtask(id, name, description, status, epicId);
                 subtask.setDuration(duration);
                 subtask.setStartTime(startTime);
                 return subtask;

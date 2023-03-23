@@ -45,7 +45,7 @@ abstract class TaskManagerTest <T extends TaskManager> {
         assertTrue(allEpics.isEmpty(), "Список задач не пуст." );
 
         var epic = new Epic(0, "Epic 1", "Description");
-        var subtask = new Subtask(1, "Subtask 1", "Description", Status.DONE, epic);
+        var subtask = new Subtask(1, "Subtask 1", "Description", Status.DONE, 0);
         epic.addSubtask(subtask);
 
         int epicId = taskManager.addTask(epic);
@@ -67,7 +67,7 @@ abstract class TaskManagerTest <T extends TaskManager> {
 
         var epic = new Epic(0, "Epic 1", "Description");
         int epicId = taskManager.addTask(epic);
-        var subtask = new Subtask(1, "Subtask 1", "Description", Status.DONE, taskManager.getEpicById(epicId));
+        var subtask = new Subtask(1, "Subtask 1", "Description", Status.DONE, epicId);
         taskManager.addTask(subtask);
 
         final List<Task> subtasks = taskManager.getAllSubtasks();
@@ -75,8 +75,8 @@ abstract class TaskManagerTest <T extends TaskManager> {
         assertNotNull(subtasks, "Задачи на возвращаются.");
         assertEquals(1, subtasks.size(), "Неверное количество задач.");
         assertEquals(subtask, subtasks.get(0), "Задачи не совпадают.");
-        assertNotNull(subtask.getHolder(), "Эпик не возвращается.");
-        assertEquals(subtask.getHolder(), epic, "Неверный эпик подзадачи.");
+        assertNotNull(taskManager.getEpicById(subtask.getHolderId()), "Эпик не возвращается.");
+        assertEquals(taskManager.getEpicById(subtask.getHolderId()), epic, "Неверный эпик подзадачи.");
     }
 
     @Test
@@ -92,7 +92,7 @@ abstract class TaskManagerTest <T extends TaskManager> {
     void clearAllEpics() {
         var epic = new Epic(0, "Epic 1", "Description");
         taskManager.addTask(epic);
-        var subtask = new Subtask("Subtask 1", "Description", Status.DONE, taskManager.getEpicById(0));
+        var subtask = new Subtask("Subtask 1", "Description", Status.DONE, 0);
         taskManager.addTask(subtask);
         taskManager.clearAllEpics();
 
@@ -103,8 +103,8 @@ abstract class TaskManagerTest <T extends TaskManager> {
     @Test
     void clearAllSubtasks() {
         var epic = new Epic("Epic 1", "Description");
-        taskManager.addTask(epic);
-        var subtask = new Subtask("Subtask 1", "Description", Status.DONE, epic);
+        int index = taskManager.addTask(epic);
+        var subtask = new Subtask("Subtask 1", "Description", Status.DONE, index);
         taskManager.addTask(subtask);
         taskManager.clearAllSubtasks();
 
@@ -140,7 +140,7 @@ abstract class TaskManagerTest <T extends TaskManager> {
         assertNull(taskManager.getSubtaskById(0), "Список задач должен быть пуст.");
 
         var epic = new Epic(0, "Epic 1", "Description");
-        var subtask = new Subtask(1, "Subtask 1", "Description", Status.NEW, epic);
+        var subtask = new Subtask(1, "Subtask 1", "Description", Status.NEW, 0);
         int epicIndex = taskManager.addTask(epic);
         int index = taskManager.addTask(subtask);
         assertNotNull(taskManager.getSubtaskById(index), "Задача не возвращается.");
@@ -230,11 +230,11 @@ abstract class TaskManagerTest <T extends TaskManager> {
         assertEquals(newEpic, taskManager.getEpicById(epicId), "Задачи не совпадают.");
 
 
-        Subtask subtask = new Subtask("Subtask 1", "Description", Status.NEW, newEpic);
+        Subtask subtask = new Subtask("Subtask 1", "Description", Status.NEW, epicId);
         final int subtaskId = taskManager.addTask(subtask);
 
         Subtask newSubtask = new Subtask(subtaskId, subtask.getName(),
-                "Updated description", Status.IN_PROGRESS, newEpic);
+                "Updated description", Status.IN_PROGRESS, epicId);
 
         taskManager.updateTask(newSubtask);
 
@@ -257,8 +257,8 @@ abstract class TaskManagerTest <T extends TaskManager> {
 
         Epic epic = new Epic(1, "Epic 1", "Description");
         final int epicId = taskManager.addTask(epic);
-        Subtask subtask1 = new Subtask(2, "Subtask 1", "Description", Status.NEW, taskManager.getEpicById(epicId));
-        Subtask subtask2 = new Subtask(3, "Subtask 2", "Description", Status.NEW, taskManager.getEpicById(epicId));
+        Subtask subtask1 = new Subtask(2, "Subtask 1", "Description", Status.NEW, epicId);
+        Subtask subtask2 = new Subtask(3, "Subtask 2", "Description", Status.NEW, epicId);
         taskManager.addTask(subtask1);
         final int sub2Id = taskManager.addTask(subtask2);
 

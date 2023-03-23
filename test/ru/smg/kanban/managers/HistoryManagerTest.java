@@ -57,7 +57,7 @@ abstract class HistoryManagerTest <T extends HistoryManager> {
         assertEquals(0, historyManager.getHistory().size(), "Задачи не удалились.");
 
         Epic epic = new Epic(0, "Epic 1", "Description");
-        Subtask subtask1 = new Subtask(1, "Subtask 1", "Description", Status.NEW, epic);
+        Subtask subtask1 = new Subtask(1, "Subtask 1", "Description", Status.NEW, epic.getId());
         epic.addSubtask(subtask1);
         historyManager.add(epic);
         historyManager.add(subtask1);

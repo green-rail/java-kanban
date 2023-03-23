@@ -13,12 +13,10 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class FileBackedTasksManagerTest extends TaskManagerTest<FileBackedTasksManager> {
+class FileBackedTaskManagerTest extends TaskManagerTest<FileBackedTaskManager> {
 
     private final String fileName = "testSaveFile.csv";
 
@@ -41,20 +39,20 @@ class FileBackedTasksManagerTest extends TaskManagerTest<FileBackedTasksManager>
     @BeforeEach
     void makeManager() {
         clearSaveFile();
-        taskManager = new FileBackedTasksManager(Managers.getDefaultHistory(), saveFile);
+        taskManager = new FileBackedTaskManager(Managers.getDefaultHistory(), saveFile);
     }
 
 
     @Test
     void testRestoreState() {
-        FileBackedTasksManager restoredManager = FileBackedTasksManager.loadFromFile(saveFile);
+        FileBackedTaskManager restoredManager = FileBackedTaskManager.loadFromFile(saveFile);
         assertNotNull(restoredManager, "Менеджер не восстановился.");
 
         clearSaveFile();
 
         Epic epic = new Epic("Epic 1", "Description");
         taskManager.addTask(epic);
-        restoredManager = FileBackedTasksManager.loadFromFile(saveFile);
+        restoredManager = FileBackedTaskManager.loadFromFile(saveFile);
         assertNotNull(restoredManager, "Менеджер не восстановился.");
         assertEquals(1, restoredManager.getAllEpics().size(), "Эпик не восстановился.");
 
@@ -69,7 +67,7 @@ class FileBackedTasksManagerTest extends TaskManagerTest<FileBackedTasksManager>
         task2.setDuration(Duration.ofMinutes(45));
         task2.setStartTime(LocalDateTime.now().plusHours(2));
         Epic epic1 = new Epic(2, "Epic 1", "Description");
-        Subtask subtask1 = new Subtask(3, "Subtask 1", "Description", Status.NEW, epic1);
+        Subtask subtask1 = new Subtask(3, "Subtask 1", "Description", Status.NEW, epic1.getId());
         subtask1.setDuration(Duration.ofMinutes(15));
         subtask1.setStartTime(LocalDateTime.now().plusHours(5));
 
@@ -83,7 +81,7 @@ class FileBackedTasksManagerTest extends TaskManagerTest<FileBackedTasksManager>
         taskManager.getEpicById(epic1Index);
         taskManager.getSubtaskById(subtask1Index);
 
-        restoredManager = FileBackedTasksManager.loadFromFile(saveFile);
+        restoredManager = FileBackedTaskManager.loadFromFile(saveFile);
 
         assertNotNull(restoredManager, "Менеджер не восстановился.");
         assertEquals(2, restoredManager.getAllTasks().size(), "Задачи не восстановились.");

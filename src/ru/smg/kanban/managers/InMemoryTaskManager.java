@@ -120,12 +120,12 @@ public class InMemoryTaskManager implements TaskManager {
         Task copy;
         if (task instanceof Subtask) {
             var subtask = (Subtask) task;
-            Task holder = epics.get(subtask.getHolder().getId());
+            Task holder = epics.get(subtask.getHolderId());
             if (holder == null) {
                 System.out.println("Подзадача не была добавлена. Эпик не найден.");
                 return -1;
             }
-            copy = new Subtask(nextId, task.getName(), task.getDescription(), task.getStatus(), (Epic)holder);
+            copy = new Subtask(nextId, task.getName(), task.getDescription(), task.getStatus(), subtask.getHolderId());
             ((Epic)holder).addSubtask((Subtask) copy);
         } else if(task instanceof Epic) {
             copy = new Epic(nextId, task.getName(), task.getDescription());
@@ -149,7 +149,7 @@ public class InMemoryTaskManager implements TaskManager {
         }
         if (task instanceof Subtask) {
             var subtask = (Subtask) task;
-            Task holder = epics.get(subtask.getHolder().getId());
+            Task holder = epics.get(subtask.getHolderId());
             ((Epic)holder).addSubtask((Subtask) task);
         }
         if (!sortedTasks.isEmpty() && sortedTasks.last().getStartTime().isEqual(task.getEndTime())){
@@ -181,21 +181,32 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     @Override
-    public void updateTask(Task task) {
+    public boolean updateTask(Task task) {
         var map = getHashMap(task);
         if (!map.containsKey(task.getId())) {
             addTask(task);
-            return;
+            return true;
         }
-        if(overlaps(task, task.getId())) {
+        if (overlaps(task, task.getId())) {
             System.out.println("Задача не была добавлена из-за пересечения по времени.");
-            return;
+            return false;
         }
         if (task instanceof Subtask) {
             var subtask = (Subtask) task;
-            subtask.getHolder().updateSubtask(subtask);
+            var oldSubtask = (Subtask)subTasks.get(subtask.getId());
+            if (oldSubtask != null) {
+                var epic = (Epic)epics.get(oldSubtask.getHolderId());
+                epic.updateSubtask(subtask);
+            }
         }
+        var oldTask = map.get(task.getId());
+        sortedTasks.remove(oldTask);
+        if (!sortedTasks.isEmpty() && sortedTasks.last().getStartTime().isEqual(task.getEndTime())){
+            task.setStartTime(task.getStartTime().plusNanos(1));
+        }
+        sortedTasks.add(task);
         map.put(task.getId(), task);
+        return true;
     }
 
     @Override
@@ -214,7 +225,8 @@ public class InMemoryTaskManager implements TaskManager {
         }
         if (task instanceof Subtask) {
             var subtask = (Subtask)task;
-            subtask.getHolder().removeSubtask(subtask);
+            var epic = (Epic)epics.get(subtask.getHolderId());
+            epic.removeSubtask(subtask);
         }
         map.remove(task.getId());
         sortedTasks.remove(task);

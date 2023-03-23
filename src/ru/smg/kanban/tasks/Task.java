@@ -41,7 +41,7 @@ public class Task {
 
 
 
-    public static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy_MM_dd_HH_mm");
+    public static final DateTimeFormatter startTimeFormatter = DateTimeFormatter.ofPattern("yyyy_MM_dd_HH_mm");
 
     public Duration getDuration() {
         return duration;
@@ -94,7 +94,7 @@ public class Task {
 
     public String serialize() {
         return String.format("%s,%s,%s,%s,%s,%s,%s", id, taskType, name, status, description,duration.toMinutes(),
-                startTime.format(formatter));
+                startTime.format(startTimeFormatter));
     }
 
     @Override

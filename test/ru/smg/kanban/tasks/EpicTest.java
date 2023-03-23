@@ -26,29 +26,29 @@ class EpicTest {
     @ParameterizedTest
     @EnumSource(Status.class)
     void epicWithSameSubtasksShouldMatchStatus(Status status) {
-        epic.addSubtask(new Subtask("Subtask 1", "Description", status, epic));
-        epic.addSubtask(new Subtask("Subtask 2", "Description", status, epic));
+        epic.addSubtask(new Subtask("Subtask 1", "Description", status, epic.getId()));
+        epic.addSubtask(new Subtask("Subtask 2", "Description", status, epic.getId()));
         assertEquals(status, epic.getStatus());
     }
 
     @Test
     void epicWithNewAndDoneSubtasksShouldBeInProgress() {
-        epic.addSubtask(new Subtask("Subtask 1", "Description", Status.NEW, epic));
-        epic.addSubtask(new Subtask("Subtask 2", "Description", Status.DONE, epic));
+        epic.addSubtask(new Subtask("Subtask 1", "Description", Status.NEW, epic.getId()));
+        epic.addSubtask(new Subtask("Subtask 2", "Description", Status.DONE, epic.getId()));
         assertEquals(Status.IN_PROGRESS, epic.getStatus());
     }
     @Test
     void toStringTest() {
-        epic.addSubtask(new Subtask("Subtask 1", "Description", Status.NEW, epic));
+        epic.addSubtask(new Subtask("Subtask 1", "Description", Status.NEW, epic.getId()));
         String value =  "[-1 epic] My epic(Epic description) [NEW]\n    [-1 sub] Subtask 1(Description) [NEW]\n";
         assertEquals(value, epic.toString());
     }
 
     @Test
     void epicDurationShouldBeSumOfSubtasks() {
-        var sub1 = new Subtask(0, "Subtask 1", "Description", Status.NEW, epic);
+        var sub1 = new Subtask(1, "Subtask 1", "Description", Status.NEW, epic.getId());
         sub1.setDuration(Duration.ofMinutes(30));
-        var sub2 = new Subtask(1, "Subtask 2", "Description", Status.NEW, epic);
+        var sub2 = new Subtask(2, "Subtask 2", "Description", Status.NEW, epic.getId());
         sub2.setDuration(Duration.ofMinutes(15));
         epic.addSubtask(sub1);
         epic.addSubtask(sub2);
@@ -57,12 +57,12 @@ class EpicTest {
 
     @Test
     void epicStartEndTimeShouldBeFromSubtasks() {
-        var sub1 = new Subtask("Subtask 1", "Description", Status.NEW, epic);
+        var sub1 = new Subtask("Subtask 1", "Description", Status.NEW, epic.getId());
         LocalDateTime startTime = LocalDateTime.now();
         sub1.setStartTime(startTime);
-        var sub2 = new Subtask("Subtask 2", "Description", Status.NEW, epic);
+        var sub2 = new Subtask("Subtask 2", "Description", Status.NEW, epic.getId());
         sub2.setStartTime(startTime.plusMinutes(30));
-        var sub3 = new Subtask("Subtask 3", "Description", Status.NEW, epic);
+        var sub3 = new Subtask("Subtask 3", "Description", Status.NEW, epic.getId());
         LocalDateTime endTime = startTime.plusMinutes(50);
         sub3.setStartTime(endTime);
         sub3.setDuration(Duration.ofMinutes(50));
@@ -75,7 +75,7 @@ class EpicTest {
 
     @Test
     void removeSubtask() {
-        var sub1 = new Subtask("Subtask 1", "Description", Status.NEW, epic);
+        var sub1 = new Subtask("Subtask 1", "Description", Status.NEW, epic.getId());
         epic.addSubtask(sub1);
         assertEquals(1, epic.getSubtasks().size(), "Подзадача не добавилась.");
         epic.removeSubtask(sub1);
