@@ -1,4 +1,4 @@
-package ru.smg.kanban.server;
+package ru.smg.kanban.httpserver;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -18,7 +18,7 @@ import java.util.Optional;
 abstract class BaseTaskHandler implements HttpHandler {
 
     protected static final Charset DEFAULT_CHARSET = StandardCharsets.UTF_8;
-    protected static final Gson gson = new GsonBuilder()
+    public static final Gson gson = new GsonBuilder()
             .registerTypeAdapter(LocalDateTime.class, new DateTimeTypeAdapter())
             .registerTypeAdapter(Duration.class, new DurationTypeAdapter())
             .create();
@@ -51,6 +51,7 @@ abstract class BaseTaskHandler implements HttpHandler {
         SUBTASK_GET_ALL,
         SUBTASK_GET_BY_ID,
         SUBTASK_DELETE_ALL,
+        SUBTASK_GET_FOR_EPIC,
         GET_HISTORY,
         GET_PRIORITIZED,
         UNKNOWN

@@ -184,8 +184,8 @@ public class InMemoryTaskManager implements TaskManager {
     public boolean updateTask(Task task) {
         var map = getHashMap(task);
         if (!map.containsKey(task.getId())) {
-            addTask(task);
-            return true;
+            int index = addTask(task);
+            return index >= 0;
         }
         if (overlaps(task, task.getId())) {
             System.out.println("Задача не была добавлена из-за пересечения по времени.");

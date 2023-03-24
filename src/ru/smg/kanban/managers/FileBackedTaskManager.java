@@ -13,32 +13,46 @@ import java.util.List;
 
 public class FileBackedTaskManager extends InMemoryTaskManager {
 
-    private static final String firstLine = "id,type,name,status,description,duration,epic\n";
-    private final File saveFile;
+    private static final String defaultFileName = "saveFile.csv";
+    protected static final String firstLine = "id,type,name,status,description,duration,epic\n";
+    private File saveFile;
 
-    public FileBackedTaskManager(HistoryManager manager, File saveFile) {
+    public FileBackedTaskManager(HistoryManager manager, String fileName) {
+        super(manager);
+        initStorage(fileName);
+    }
+
+    protected void initStorage(String fileName) {
+        saveFile = new File(fileName);
+        try {
+            saveFile.createNewFile();
+        } catch (IOException e) {
+            throw new RuntimeException("Can't create a file with this name.");
+        }
+    }
+
+    private FileBackedTaskManager(HistoryManager manager, File saveFile) {
         super(manager);
         this.saveFile = saveFile;
     }
 
-    public static FileBackedTaskManager loadFromFile(File file) {
+    public static FileBackedTaskManager loadFromFile(String fileName) {
         var historyManager = new InMemoryHistoryManager();
-        var manager = new FileBackedTaskManager(historyManager, file);
-        manager.load();
-        return manager;
+        File saveFile = new File(fileName);
+        if (saveFile.exists()) {
+            var manager = new FileBackedTaskManager(historyManager, saveFile);
+            manager.load();
+            return manager;
+        } else {
+            throw new RuntimeException("Файл не найден.");
+        }
     }
 
     public static void main(String[] args) {
 
-        File file = new File("saveFile.csv");
-        try {
-            file.createNewFile();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
 
 
-        TaskManager taskManager = new FileBackedTaskManager(Managers.getDefaultHistory(), file);
+        TaskManager taskManager = new FileBackedTaskManager(Managers.getDefaultHistory(), defaultFileName);
         var taskSound = new Task("Добавить звук",
                 "Звуки ui; выигрыша; проигрыша; фоновая музыка", Status.NEW);
         taskManager.addTask(taskSound);
@@ -82,7 +96,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         printHistory(taskManager);
 
         System.out.println("Загружаем с диска...");
-        var loadedManager = FileBackedTaskManager.loadFromFile(file);
+        var loadedManager = FileBackedTaskManager.loadFromFile(defaultFileName);
         printHistory(loadedManager);
     }
 
@@ -91,7 +105,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         manager.getHistory().forEach(System.out::println);
     }
 
-    private static List<Integer> historyFromString(String value) {
+    protected static List<Integer> historyFromString(String value) {
         List<Integer> result = new ArrayList<>();
         if (value == null || value.isBlank()) return result;
         String[] items = value.split(",");
@@ -138,7 +152,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         save();
     }
 
-    private void load() {
+    protected void load() {
         try (BufferedReader lineReader = new BufferedReader(new FileReader(saveFile))) {
             String line;
             lineReader.readLine();
@@ -174,7 +188,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         }
     }
 
-    private void save() {
+    protected void save() {
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(saveFile))) {
             writer.write(firstLine);
             for (Task task : getAllTasks()) {
@@ -196,7 +210,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         }
     }
 
-    private Task fromString(String value) {
+    protected Task fromString(String value) {
 
         String[] split = value.split(",");
 

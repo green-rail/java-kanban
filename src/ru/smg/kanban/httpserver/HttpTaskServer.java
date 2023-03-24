@@ -1,6 +1,5 @@
-package ru.smg.kanban.server;
+package ru.smg.kanban.httpserver;
 
-import com.google.gson.Gson;
 import com.sun.net.httpserver.HttpServer;
 import ru.smg.kanban.managers.Managers;
 import ru.smg.kanban.managers.TaskManager;
@@ -36,5 +35,7 @@ public class HttpTaskServer {
         System.out.println("HTTP-Task-сервер запущен на " + PORT + " порту!");
     }
 
-
+    public void stop() {
+        server.stop(0);
+    }
 }

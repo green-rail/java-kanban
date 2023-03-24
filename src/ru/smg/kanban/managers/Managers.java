@@ -5,7 +5,7 @@ import java.io.IOException;
 
 public class Managers {
     public static TaskManager getDefault() {
-        return new InMemoryTaskManager(getDefaultHistory());
+        return new HttpTaskManager(getDefaultHistory(), "http://localhost:8078/");
     }
 
     public static TaskManager getFileBackedTaskManager() {
@@ -13,7 +13,7 @@ public class Managers {
         File file = new File("saveFile.csv");
         try {
             file.createNewFile();
-            return new FileBackedTaskManager(getDefaultHistory(), file);
+            return new FileBackedTaskManager(getDefaultHistory(), "saveFile.csv");
         } catch (IOException e) {
             return null;
         }

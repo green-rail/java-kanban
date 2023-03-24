@@ -1,4 +1,4 @@
-package ru.smg.kanban.server;
+package ru.smg.kanban.httpserver;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
@@ -68,7 +68,6 @@ class TaskHandler extends BaseTaskHandler {
         try (InputStream reader = httpExchange.getRequestBody()) {
             String body = new String(reader.readAllBytes(), DEFAULT_CHARSET);
             try {
-
                 JsonObject element = JsonParser.parseString(body).getAsJsonObject();
                 String taskType = element.get("taskType").getAsString();
 
@@ -76,7 +75,6 @@ class TaskHandler extends BaseTaskHandler {
                 switch (taskType) {
                     case "EPIC":
                         taskClass = Epic.class;
-                        System.out.println("EPIC DETECTED");
                         break;
                     case "SUBTASK":
                         taskClass = Subtask.class;
@@ -85,7 +83,6 @@ class TaskHandler extends BaseTaskHandler {
                         taskClass = Task.class;
                 }
 
-                //Task task = gson.fromJson(body, Task.class);
                 Task task = gson.fromJson(body, taskClass);
                 if (task.getName().isBlank()) {
                     writeResponse(httpExchange, "Название не может быть пустым.", 400);

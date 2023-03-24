@@ -1,40 +1,58 @@
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import ru.smg.kanban.httpserver.HttpTaskServer;
+import ru.smg.kanban.kvserver.KVServer;
 import ru.smg.kanban.managers.Managers;
 import ru.smg.kanban.managers.TaskManager;
-import ru.smg.kanban.server.DateTimeTypeAdapter;
-import ru.smg.kanban.server.DurationTypeAdapter;
-import ru.smg.kanban.server.HttpTaskServer;
+import ru.smg.kanban.httpserver.DateTimeTypeAdapter;
+import ru.smg.kanban.httpserver.DurationTypeAdapter;
 import ru.smg.kanban.tasks.*;
 
+import java.io.IOException;
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 
 public class Main {
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
 
 
         //serializeTasks();
 
-        var server = new HttpTaskServer();
-        server.start();
+        //new KVServer().start();
+
+        //TaskManager taskManager = Managers.getDefault();
+
+        new HttpTaskServer().start();
+
+        //try {
+        //    client = new KVTaskClient("http://localhost:8078/");
+        //} catch (InterruptedException e) {
+        //    throw new RuntimeException(e);
+        //}
+
+        //try {
+        //    client.put("0", "my value");
+        //    System.out.println("GOT VALUE: " + client.load("0"));
+        //    client.put("0", "my updated value");
+        //    System.out.println("GOT VALUE: " + client.load("0"));
+        //} catch (InterruptedException e) {
+        //    throw new RuntimeException(e);
+        //}
+
+
+        //var server = new HttpTaskServer();
+        //server.start();
+
 
 
         /*
-        TaskManager taskManager = Managers.getDefault();
-
-        Gson gson = new Gson();
 
         int taskSoundId = taskManager.addTask(new Task(
                 "Добавить звук",
                 "Звуки ui; выигрыша; проигрыша; фоновая музыка",
                 Status.NEW
         ));
-
-        System.out.println(gson.toJson(taskManager.getTaskById(taskSoundId)));
-
 
         int taskUIId = taskManager.addTask( new Task(
                 "Адаптивный ui",
@@ -51,20 +69,20 @@ public class Main {
                 "Изучить документацию",
                 "За последнее время SDK обновился нужно быть в курсе изменений",
                 Status.NEW,
-                taskManager.getEpicById(epicSDKId)
+                epicSDKId
         ));
         int subSDK2Id = taskManager.addTask( new Subtask(
                 "Лидерборд",
                 "Оценить сложность реализации. Если сложно то целесообразность фичи под вопросом",
                 Status.NEW,
-                taskManager.getEpicById(epicSDKId)
+                epicSDKId
         ));
 
         int subSDK3 = taskManager.addTask(new Subtask(
                 "Облачные сейвы",
                 "Добавить сохранение прогресса",
                 Status.NEW,
-                taskManager.getEpicById(epicSDKId)
+                epicSDKId
         ));
 
         int epicAsyncId = taskManager.addTask(new Epic(
@@ -101,7 +119,9 @@ public class Main {
         taskManager.clearAllEpics();
         printHistory(taskManager);
 
+
          */
+
     }
 
     private static void serializeTasks() {

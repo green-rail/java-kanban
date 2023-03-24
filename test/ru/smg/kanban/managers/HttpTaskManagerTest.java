@@ -1,64 +1,60 @@
 package ru.smg.kanban.managers;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import ru.smg.kanban.kvserver.KVServer;
 import ru.smg.kanban.tasks.Epic;
 import ru.smg.kanban.tasks.Status;
 import ru.smg.kanban.tasks.Subtask;
 import ru.smg.kanban.tasks.Task;
 
-import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.time.Duration;
 import java.time.LocalDateTime;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-class FileBackedTaskManagerTest extends TaskManagerTest<FileBackedTaskManager> {
+class HttpTaskManagerTest  extends TaskManagerTest<HttpTaskManager>{
 
-    private final String fileName = "testSaveFile.csv";
+    KVServer server;
 
-    private File saveFile;
-
-    private void clearSaveFile() {
-        try {
-            Files.deleteIfExists(Paths.get(fileName));
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-        saveFile = new File(fileName);
-        try {
-            saveFile.createNewFile();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
+    private final String baseUrl = "http://localhost:8078/";
 
     @BeforeEach
-    void makeManager() {
-        clearSaveFile();
-        taskManager = new FileBackedTaskManager(Managers.getDefaultHistory(), fileName);
+    void runServer() {
+        try {
+            server = new KVServer();
+            server.start();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        taskManager = new HttpTaskManager(Managers.getDefaultHistory(), baseUrl);
     }
 
+    @AfterEach
+    void stopServer() {
+        server.stop();
+    }
 
     @Test
-    void testRestoreState() {
-        FileBackedTaskManager restoredManager = FileBackedTaskManager.loadFromFile(fileName);
+    void restoreFromServer() {
+        HttpTaskManager restoredManager = HttpTaskManager.restoreFromServer(baseUrl);
         assertNotNull(restoredManager, "Менеджер не восстановился.");
 
-        clearSaveFile();
+        stopServer();
+        runServer();
 
         Epic epic = new Epic("Epic 1", "Description");
         taskManager.addTask(epic);
-        restoredManager = FileBackedTaskManager.loadFromFile(fileName);
+        restoredManager = HttpTaskManager.restoreFromServer(baseUrl);
         assertNotNull(restoredManager, "Менеджер не восстановился.");
         assertEquals(1, restoredManager.getAllEpics().size(), "Эпик не восстановился.");
-
         assertEquals(0, restoredManager.historyManager.getHistory().size(), "История не пуста.");
 
-        makeManager();
+        stopServer();
+        runServer();
 
         Task task1 = new Task(0, "Task 1", "Description", Status.NEW);
         task1.setDuration(Duration.ofMinutes(30));
@@ -81,7 +77,7 @@ class FileBackedTaskManagerTest extends TaskManagerTest<FileBackedTaskManager> {
         taskManager.getEpicById(epic1Index);
         taskManager.getSubtaskById(subtask1Index);
 
-        restoredManager = FileBackedTaskManager.loadFromFile(fileName);
+        restoredManager = HttpTaskManager.restoreFromServer(baseUrl);
 
         assertNotNull(restoredManager, "Менеджер не восстановился.");
         assertEquals(2, restoredManager.getAllTasks().size(), "Задачи не восстановились.");

@@ -14,9 +14,9 @@ public class Task {
     protected Duration duration;
     protected LocalDateTime startTime;
     protected TaskType taskType;
+    public static final DateTimeFormatter startTimeFormatter = DateTimeFormatter.ofPattern("yyyy_MM_dd_HH_mm");
 
-    public int getId() {return id;
-    }
+    public int getId() {return id;}
 
     public String getName() {
         return name;
@@ -35,13 +35,7 @@ public class Task {
     public Status getStatus() {
         return status;
     }
-    public void setStatus(Status status) {
-        this.status = status;
-    }
-
-
-
-    public static final DateTimeFormatter startTimeFormatter = DateTimeFormatter.ofPattern("yyyy_MM_dd_HH_mm");
+    public void setStatus(Status status) {this.status = status;}
 
     public Duration getDuration() {
         return duration;
@@ -102,7 +96,8 @@ public class Task {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Task task = (Task) o;
-        return id == task.id && name.equals(task.name) && description.equals(task.description) && status == task.status && duration.equals(task.duration);
+        return id == task.id && name.equals(task.name) && description.equals(task.description)
+                && status == task.status && duration.equals(task.duration);
     }
 
     @Override

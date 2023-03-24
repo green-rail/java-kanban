@@ -1,4 +1,4 @@
-package ru.smg.kanban.server;
+package ru.smg.kanban.httpserver;
 
 import com.sun.net.httpserver.HttpExchange;
 import ru.smg.kanban.managers.TaskManager;
@@ -6,7 +6,6 @@ import ru.smg.kanban.tasks.Epic;
 
 import java.io.IOException;
 import java.net.URI;
-import java.util.Arrays;
 
 class EpicHandler extends BaseTaskHandler {
 

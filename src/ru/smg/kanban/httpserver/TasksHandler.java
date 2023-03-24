@@ -1,4 +1,4 @@
-package ru.smg.kanban.server;
+package ru.smg.kanban.httpserver;
 
 import com.sun.net.httpserver.HttpExchange;
 import ru.smg.kanban.managers.TaskManager;
