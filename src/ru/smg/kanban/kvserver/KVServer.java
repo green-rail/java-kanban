@@ -49,7 +49,7 @@ public class KVServer {
 			}
 			String value = data.get(key);
 			if (value == null) {
-				System.out.println("Значение для ключа " + key + " не найдено.");
+				System.out.printf("Значение для ключа %s не найдено.\n", key);
 				h.sendResponseHeaders(404, 0);
 				return;
 			}
@@ -59,7 +59,7 @@ public class KVServer {
 			try (OutputStream os = h.getResponseBody()) {
 				os.write(bytes);
 			}
-			System.out.println("Значение для ключа " + key + " отправлено.");
+			System.out.printf("Значение для ключа %s отправлено.\n", key);
 		} finally {
 			h.close();
 		}
@@ -87,7 +87,7 @@ public class KVServer {
 					return;
 				}
 				data.put(key, value);
-				System.out.println("Значение для ключа " + key + " успешно обновлено!");
+				System.out.printf("Значение для ключа %s успешно обновлено!\n", key);
 				h.sendResponseHeaders(200, 0);
 			} else {
 				System.out.println("/save ждёт POST-запрос, а получил: " + h.getRequestMethod());
@@ -114,7 +114,6 @@ public class KVServer {
 
 	public void start() {
 		System.out.println("Запускаем сервер на порту " + PORT);
-		System.out.println("Открой в браузере http://localhost:" + PORT + "/");
 		System.out.println("API_TOKEN: " + apiToken);
 		server.start();
 	}
